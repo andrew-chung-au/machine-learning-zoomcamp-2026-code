@@ -37,9 +37,7 @@ This homework creates a linear regression model to predict car fuel efficiency u
 ## 5. Effect of random seed *(1 point)*
 
 **Answer:**  
-- `[ADD ANSWER: 0.006 / 0.016 / 0.029 / 0.036]`
-
-I repeated the train/validation/test split using seeds from `0` to `9`. For each split, I filled missing values with `0`, trained an unregularized linear regression model, and calculated validation RMSE.
+- `0.029`
 
 ---
 
