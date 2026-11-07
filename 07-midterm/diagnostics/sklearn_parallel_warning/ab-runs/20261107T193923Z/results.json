@@ -1,0 +1,15 @@
+{
+  "run_id": "20261107T193923Z",
+  "off": {
+    "attempts": 15,
+    "valid": 15,
+    "with_warning": 8
+  },
+  "on": {
+    "attempts": 15,
+    "valid": 15,
+    "with_warning": 0
+  },
+  "fisher_exact_two_sided_p": 0.0021989005497251375,
+  "excluded": []
+}

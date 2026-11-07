@@ -1,0 +1,29 @@
+{
+  "attempt": "grid--1_forest--1__repeat-01",
+  "started_utc": "2026-11-07T19:15:13.119352+00:00",
+  "finished_utc": "2026-11-07T19:15:25.167198+00:00",
+  "command": [
+    "/home/andrew/courses/machine-learning-zoomcamp-2026-code/.venv/bin/python3",
+    "-u",
+    "/home/andrew/courses/machine-learning-zoomcamp-2026-code/07-midterm/reproduce_sklearn_parallel_warning.py",
+    "--grid-n-jobs",
+    "-1",
+    "--forest-n-jobs",
+    "-1",
+    "--repeat",
+    "1",
+    "--warning-mode",
+    "default"
+  ],
+  "working_directory": "/home/andrew/courses/machine-learning-zoomcamp-2026-code",
+  "grid_n_jobs": -1,
+  "forest_n_jobs": -1,
+  "repetition": 1,
+  "exit_code": 0,
+  "capture_processes_started": 19,
+  "target_warning_records": 0,
+  "capture_record_errors": 0,
+  "status": "no_target_warning_observed_capture_active",
+  "stdout_stderr_log": "stdout_stderr.log",
+  "capture_directory": "capture"
+}

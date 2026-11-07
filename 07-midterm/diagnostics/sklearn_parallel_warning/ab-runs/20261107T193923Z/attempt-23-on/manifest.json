@@ -1,0 +1,29 @@
+{
+  "attempt": "attempt-23-on",
+  "arm": "on",
+  "expected_context_aware_warnings": 1,
+  "observed_context_aware_warnings": [
+    1
+  ],
+  "started_utc": "2026-11-07T19:44:40.689646+00:00",
+  "finished_utc": "2026-11-07T19:44:52.830231+00:00",
+  "command": [
+    "/home/andrew/courses/machine-learning-zoomcamp-2026-code/.venv/bin/python3",
+    "-u",
+    "/home/andrew/courses/machine-learning-zoomcamp-2026-code/07-midterm/reproduce_sklearn_parallel_warning.py",
+    "--grid-n-jobs",
+    "-1",
+    "--forest-n-jobs",
+    "-1",
+    "--repeat",
+    "1",
+    "--warning-mode",
+    "default"
+  ],
+  "exit_code": 0,
+  "capture_processes_started": 19,
+  "target_warning_records": 0,
+  "warning_pids": [],
+  "passed_filter_lengths": [],
+  "status": "no_warning_observed"
+}

@@ -1,0 +1,3 @@
+Python 3.14.5 | context_aware_warnings=0 | switch_interval=1e-06
+filters at end (started with 5): {0: 16, 1: 13, 2: 11, 3: 8, 4: 12}
+trials where the next Parallel call would emit the warning: 16/60
