@@ -1,5 +1,34 @@
 # Investigation: scikit-learn parallel warning
 
+> **Update 2026-11-07: superseded in part. Read `FINDINGS.md` first.**
+>
+> This file records the first stage of the investigation and is kept
+> unchanged below so the history stays visible. Later work changed three of
+> its statements:
+>
+> 1. **"The underlying cause remains unresolved" is no longer the current
+>    position.** A probable cause is now identified (thread-unsafe handling
+>    of `warnings.filters` in scikit-learn's worker wrapper) and supported by a
+>    controlled comparison: 8 of 15 attempts warned with
+>    `PYTHON_CONTEXT_AWARE_WARNINGS=0`, against 0 of 15 with it set to 1
+>    (p = 0.0022). The mechanism itself has still not been observed directly.
+>    See `FINDINGS.md`, sections 1, 4.5 and 5.
+> 2. **The "later real run did not capture the warning" and "no
+>    filter-transition events" findings (Findings 3 and 4 below) must not be
+>    read as evidence that no transition occurred.** The filter tracker in
+>    `capture.py` replaces `warnings.filters` with a list subclass, and
+>    `catch_warnings()` swaps in a plain `list` copy on Python 3.14, so the
+>    tracker is gone after the first task. It could not have detected the
+>    event. The absence of transition events carries no information.
+>    See `FINDINGS.md`, section 6. The tracker still needs to be replaced
+>    (`FINDINGS.md`, section 8, item 4).
+> 3. **The statement that the original FAQ "must remain unchanged" has been
+>    lifted for `07-faq_pr.md`.** That entry has been revised to match the
+>    evidence. The notebook, dataset and attribution remain unchanged.
+>
+> The per-process counts, the 200-warning figure and the other numbers below
+> are unaffected.
+
 ## Purpose and scope
 
 This investigation examines the warning:
@@ -49,6 +78,12 @@ This is a no-warning observation, not evidence that the warning has been
 fixed. The absence of a captured warning also does not prove that every
 relevant process and warning path was observed.
 
+> **Correction (2026-11-07):** the "no filter-transition events" part of this
+> finding is not meaningful, because the tracker could not see transitions
+> (see the update note at the top of this file). The no-warning observation
+> itself stands, and fits the later finding that the warning is intermittent
+> (about half of attempts with context-aware warnings off).
+
 ### 4. The diagnostic instrumentation passed its regression tests
 
 The synthetic joblib capture test, filter-tracking regression tests, and
@@ -82,6 +117,11 @@ The underlying cause remains unresolved. The intermittent no-warning result
 must not be treated as a fix, and the filter-state observation must not be
 presented as a confirmed causal explanation.
 
+> **Update (2026-11-07):** a probable cause has since been identified and
+> tested; see `FINDINGS.md`. The caution above about not presenting the
+> filter-state observation as confirmed causation still applies to the
+> mechanism, which remains unobserved.
+
 ## Evidence locations
 
 - `real-probe-20261107T173304Z/`: historical real probe and per-process
@@ -93,7 +133,8 @@ presented as a confirmed causal explanation.
 
 ## Change policy
 
-Keep the original FAQ, its notebook, the dataset, and its attribution
-unchanged. Make future investigation changes in the separate investigation
-artefacts. Do not suppress the warning or patch installed library code merely
+Keep the notebook, the dataset, and its attribution unchanged. The FAQ entry
+(`07-faq_pr.md`) was revised on 2026-11-07 after maintainer review, to match
+the evidence in `FINDINGS.md`; its earlier text is in git history. Make future
+investigation changes in the separate investigation artefacts. Do not suppress the warning or patch installed library code merely
 to obtain a clean run.
