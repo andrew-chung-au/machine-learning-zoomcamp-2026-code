@@ -80,7 +80,7 @@ desktop.ini
 #             shared with others. Ignoring *.log would hide future runs.
 # *.jsonl   - per-process capture records (the primary evidence).
 # *.bin     - 05-deployment/pipeline.bin is used by the Dockerfile.
-# *.csv, *.arff - course datasets.
+# *.csv, *.arff - course and project datasets.
 # uv.lock, .python-version, pyproject.toml - environment reproducibility.
 #
 # If you generate large throwaway logs, ignore them narrowly, for example:
