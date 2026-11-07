@@ -1,148 +1,318 @@
-# Findings: probable cause of the scikit-learn parallel warning
+# Investigation report: scikit-learn parallel warning in the midterm FAQ entry
 
-Status: **probable cause identified; not proven for the real workload.**
-Supersedes the "cause remains unresolved" conclusion in `INVESTIGATION.md`
-only to the extent stated below. Evidence levels are labelled throughout.
+| | |
+| --- | --- |
+| Date | 2026-11-07 |
+| Subject | FAQ entry on `GridSearchCV` parallel processing and the `sklearn.utils.parallel.delayed` warning |
+| Trigger | Maintainer review of the FAQ pull request: the submitted example could not be verified, and a reproducer was requested |
+| Status | Probable cause identified and supported by a controlled comparison; the mechanism itself has not been observed directly |
+| Evidence labels | **source** (library code), **capture** (instrumented real runs), **probe** (standard-library surrogate), **A/B** (controlled real-workload comparison) |
 
-## Summary
+## 1. Summary
 
-The warning is most likely a **false positive** produced by scikit-learn
-itself, triggered by a thread-safety problem between
-`sklearn.utils.parallel._FuncWrapper` and `warnings.catch_warnings()` on
-Python without context-aware warnings. It does not indicate that the user
-code mis-pairs `delayed` and `Parallel`.
+The FAQ entry presented `PYTHON_CONTEXT_AWARE_WARNINGS=1` as the resolution
+for a scikit-learn parallel-processing warning. It was written on the basis of
+a single observation in a single environment, without a runnable reproducer.
+It also led with a conventional warning-filter step whose result in the
+author's own environment (ineffective) was not stated. The maintainer's
+objection that the fix had not been established was correct.
 
-## 1. The warning condition (verified from source)
+The investigation that followed found that the warning is most likely a
+**false positive raised by scikit-learn itself**. It is not caused by the
+user's code mis-pairing `delayed` and `Parallel`. The warning appears to be
+the visible symptom of a thread-safety problem: concurrent worker threads
+corrupt the process-wide warning-filter list, and scikit-learn then reads an
+empty list as "configuration was not propagated".
 
-scikit-learn 1.9.1, `sklearn/utils/parallel.py`:
+On the real workload (grid search `n_jobs=-1`, random forest `n_jobs=-1`),
+15 paired attempts gave:
 
-```python
-141  config = getattr(self, "config", {})
-142  warning_filters = getattr(self, "warning_filters", [])
-143  if not config or not warning_filters:
-144      warnings.warn("`sklearn.utils.parallel.delayed` should be used with ...")
+| `PYTHON_CONTEXT_AWARE_WARNINGS` | attempts with the warning |
+| --- | --- |
+| 0 | 8 of 15 (53%) |
+| 1 | 0 of 15 (0%) |
+
+Fisher exact test, two-sided: p = 0.0022. The result supports the proposed
+explanation. It does not prove it, because the moment the filter list is
+emptied has never been recorded. Two further observations are also not yet
+explained (section 5).
+
+The FAQ entry should be revised before it is relied on (section 8).
+
+## 2. What went wrong
+
+1. **The fix was stated as a result without evidence to support it.** The FAQ
+   entry said the setting "resolved the warning". The basis was one
+   environment and no repeated or controlled comparison. The warning is
+   intermittent: in the later controlled comparison it appeared in about half
+   of the attempts with the setting off, so a single clean run says very
+   little.
+2. **The example in the submission was not runnable.** It used names for the
+   estimator, parameter grid and data that were never defined, so a reviewer
+   could not reproduce the problem or test the proposed fix.
+3. **The result of Step 1 in the author's environment was not reported.** The
+   entry offered a targeted `warnings.filterwarnings(...)` first. This was a
+   reasonable inclusion: targeted suppression is the usual first attempt in
+   earlier FAQ entries, and the author's environment might have been unusual,
+   so it was offered for readers whose situation differed. The entry framed it
+   conditionally ("if the warning still appears, continue to Step 2"). The gap
+   is that the filter had already been tried and had **not** worked in the
+   author's environment, and the entry did not say so. Readers could not tell
+   that the first step was known to fail in the one environment tested.
+   The mechanism in section 4.3 explains the failure: when the captured filter
+   list is empty, the user's filter is not re-applied in the worker. Whether
+   the filter works in other environments, for example where the list is not
+   emptied, was not tested.
+4. **The scope of the claim exceeded the evidence.** The entry did note that
+   the workaround was not guaranteed, but the headline and summary still read
+   as a fix.
+5. **The first diagnostic suite could not detect the event it was built to
+   find.** See section 6.
+
+## 3. Reproducer
+
+Requested by the maintainer: estimator, parameter grid, exact command,
+traceback, and whether the code uses `joblib` or scikit-learn's own
+`Parallel` / `delayed`.
+
+| Item | Value |
+| --- | --- |
+| Estimator | `RandomForestClassifier(random_state=1, n_jobs=-1)` |
+| Parameter grid | `n_estimators=[200]`, `max_depth=[10, 20, None]`, `min_samples_leaf=[1]`, `max_features=["sqrt", 0.5]` |
+| Search | `GridSearchCV(scoring="roc_auc", cv=StratifiedKFold(5, shuffle=True, random_state=1), n_jobs=-1)` |
+| Data | `07-midterm/data/training-dataset.arff`, training split of 8,844 rows and 30 features |
+| Own use of `joblib` / `Parallel` / `delayed` | None. The code uses `GridSearchCV` and `RandomForestClassifier` only; `joblib` is imported solely to print its version |
+| Environment | Python 3.14.5 (GIL build), scikit-learn 1.9.1, joblib 1.6.0, NumPy 2.5.4, SciPy 1.17.1 |
+| Command (single run) | `uv run python 07-midterm/reproduce_sklearn_parallel_warning.py --grid-n-jobs -1 --forest-n-jobs -1 --repeat 3` |
+| Command (controlled comparison) | `uv run python 07-midterm/diagnostics/sklearn_parallel_warning/ab_context_aware.py --pairs 15` |
+
+The warning is intermittent. A single run may be clean; repeat the command.
+
+Traceback of the emitting thread (from `capture-970401.jsonl`, innermost
+frame last):
+
+```text
+threading.py, line 1044, in _bootstrap
+threading.py, line 1082, in _bootstrap_inner
+threading.py, line 1024, in run
+multiprocessing/pool.py, line 125, in worker
+joblib/_utils.py, line 109, in __call__
+joblib/parallel.py, line 607, in __call__
+sklearn/utils/parallel.py, line 144, in __call__
+    warnings.warn(
 ```
 
-The test is `not config or not warning_filters`. It fires when the captured
-**warning-filter list is empty**, not only when `Parallel` was bypassed.
-`Parallel.__call__` captures that list with `warnings._get_filters()` (or
-`warnings.filters`) at the moment it is called.
+Warning text: `` `sklearn.utils.parallel.delayed` should be used with
+`sklearn.utils.parallel.Parallel` to make it possible to propagate the
+scikit-learn configuration of the current thread to the joblib workers. ``
 
-## 2. What the real captures show (observed)
+## 4. Findings
 
-`real-probe-20261107T173304Z/capture-944567.jsonl`, 200 target-warning records:
+### 4.1 The warning condition (source)
 
-| field | value |
+In scikit-learn 1.9.1, `sklearn/utils/parallel.py` lines 141-144:
+
+```python
+config = getattr(self, "config", {})
+warning_filters = getattr(self, "warning_filters", [])
+if not config or not warning_filters:
+    warnings.warn("`sklearn.utils.parallel.delayed` should be used with ...")
+```
+
+The test fires when the captured warning-filter list is **empty**, in
+addition to when `Parallel` was bypassed. The message therefore
+misdescribes the situation whenever `Parallel` was used correctly and the
+filter list happens to be empty.
+
+### 4.2 What the real runs recorded (capture)
+
+Across all 1,703 warning records in `ab-runs/20261107T193923Z/`:
+
+| Field | Result |
 | --- | --- |
-| `captured_config_empty` | `false` (config **was** propagated) |
-| `passed_warning_filters` | `[]` (filters empty) |
-| `initial_warning_filters` (same PID, at startup) | 5 filters |
-| stack | `threading` -> `multiprocessing/pool.py worker` -> `joblib BatchedCalls` -> `sklearn/utils/parallel.py:144 __call__` |
+| Configuration present (`captured_config_empty = false`) | 1,703 of 1,703 |
+| Captured filter list length | 0 in 1,703 of 1,703 |
+| Emitter | `sklearn/utils/parallel.py:144` in 1,703 of 1,703 |
+| Stack | thread-pool worker in 1,703 of 1,703 |
+| Filters at process startup (emitting processes) | 5 |
 
-Interpretation: `sklearn.Parallel` **was** used (config present); the
-warning fired only because the filter list was empty. The stack is a
-**thread-pool worker**, i.e. joblib's threading backend, which is what
-`RandomForestClassifier(n_jobs=-1)` uses internally.
+The same signature appears in the earlier records
+(`real-probe-20261107T173304Z/capture-944567.jsonl`, and PID 970401 in
+`runs/20261107T185047Z`). In every case scikit-learn's `Parallel` was used and
+the configuration was propagated; the warning fired because the filter list
+was empty.
 
-Pattern across all logs in `07-midterm/` (observed):
+Pattern across all logged runs: the warning appeared only when the forest used
+`n_jobs=-1` **and** the grid search used worker processes. It did not appear
+with a single-threaded forest in any logged run.
 
-| log | grid `n_jobs` | forest `n_jobs` | runs with warning |
-| --- | --- | --- | --- |
-| `reproduce_warning.log` | -1 | 1 | 0 of 3 |
-| `reproduce_warning.log` | -1 | -1 | 2 of 3 (runs 4 and 6) |
-| `reproduce_warning_traceback.log` | 1 | -1 | 0 of 5 |
-| `minimal_reproducer_traceback.log` | -1 | -1 | 1 of 3 (run 3) |
-| `reproduce_warning_stack.log` | -1 | -1 | 1 of 5 (run 5) |
+### 4.3 Proposed mechanism (hypothesis)
 
-The warning appears only when threads are used inside the workers, is
-intermittent, and tends to appear after earlier runs. This is consistent with
-the mechanism in section 3. It is a small sample and not a controlled test.
+Without context-aware warnings, `warnings.filters` is one list shared by the
+whole process, and `catch_warnings` is documented as not thread-safe. Each
+scikit-learn task runs `catch_warnings()`, `resetwarnings()`, then re-adds the
+captured filters. If a second thread enters between the first thread's reset
+and re-add, it saves the half-reset list. When the threads leave out of order,
+the global list is restored to that half-reset state. The next `Parallel`
+call in the same process captures the truncated or empty list, and every task
+then warns. In worker processes nothing restores the list afterwards, so the
+damage can persist across later tasks.
 
-## 3. Proposed mechanism
+This would also account for the failure of the Step 1 filter in the tested
+environment: the user's filter is part of the list that was lost.
 
-With threads and no context-aware warnings, `warnings.filters` is one list for
-the whole process, and `catch_warnings` is documented as not thread-safe. Each
-sklearn task does `catch_warnings()` + `resetwarnings()` + re-add. If a second
-thread enters between the first thread's reset and re-add, it snapshots the
-half-reset list. When the threads exit out of order, the global list is
-restored to that half-reset snapshot. The next `Parallel.__call__` in that
-process captures the truncated or empty list and every task warns. In loky
-worker processes nothing restores the list afterwards, so the damage persists
-for later tasks that reuse the worker.
+The same mechanism is described in the scikit-learn tracker as
+[#35089](https://github.com/scikit-learn/scikit-learn/issues/35089)
+("thread-based `Parallel` can corrupt the process-wide warning filters", open
+when last checked; related: #32631, closed). The reporter there stated that
+the race could not be triggered on a GIL build with a realistic workload. The
+data in this folder come from a GIL build (Python 3.14.5) with a realistic
+workload, and are therefore relevant to that issue.
 
-This also explains why `warnings.filterwarnings("ignore", ...)` in the
-notebook did not help: the user's filter is part of the list that was lost, and
-the worker re-applies the empty list inside each task.
-
-## 4. Stdlib reproduction of the mechanism (observed, but a surrogate)
+### 4.4 Standard-library reproduction of the mechanism (probe)
 
 `thread_filter_race_probe.py` copies the wrapper's filter handling and runs it
-in threads. It uses no scikit-learn, joblib or dataset. Python 3.14.4, 60
-trials, switch interval shortened to 1e-6 s:
+in threads, with no scikit-learn, joblib or dataset. Python 3.14.5, 60 trials,
+switch interval shortened to 1e-6 s (`probe_default.log`,
+`probe_context_aware.log`):
 
-| setting | final filter count (started with 5) | next `Parallel` call would warn |
+| Setting | Filters remaining (started with 5) | Next `Parallel` call would warn |
 | --- | --- | --- |
-| default | `{0: 19, 1: 10, 2: 12, 3: 11, 4: 8}` | 19 / 60 |
+| default | `{0: 16, 1: 13, 2: 11, 3: 8, 4: 12}` | 16 / 60 |
 | `PYTHON_CONTEXT_AWARE_WARNINGS=1` | `{5: 60}` | 0 / 60 |
 
-With the default 5 ms switch interval: 0 of 20 trials corrupted. The
-shortened interval is an **amplification** that shows the interleaving is
-possible, not that it is common. It does **not** show the real
-`GridSearchCV` run hits the same interleaving.
+A separate run on Python 3.14.4 gave the same pattern (19/60 and 0/60). At the
+default 5 ms switch interval the probe produced no corruption in 20 trials.
+The shortened interval is a deliberate amplification: it shows that the
+interleaving is possible, not that the real run reaches it this way.
 
-## 5. Upstream
+### 4.5 Controlled comparison on the real workload (A/B)
 
-scikit-learn issue **#35089** ("thread-based `Parallel` can corrupt the
-process-wide warning filters", open, labels: Bug, free-threading, Needs
-Investigation) describes the same mechanism and the same spurious warning.
-Related: #32631 (closed, intermittent CI failure on free-threaded 3.13).
+`ab_context_aware.py --pairs 15`, evidence in `ab-runs/20261107T193923Z/`.
+Grid search `n_jobs=-1` and forest `n_jobs=-1`; a fresh process per attempt;
+arms alternated with the order swapped each pair; `PYTHONWARNINGS` removed.
 
-In that thread the reporter wrote that they could not trigger the race on GIL
-Python with a realistic workload. The logs in this folder were captured on a
-GIL build (Python 3.14.5, `Py_GIL_DISABLED = 0`) with a realistic workload, so
-they are relevant new evidence for that issue.
+| `PYTHON_CONTEXT_AWARE_WARNINGS` | Attempts | Valid | With warning | Rate |
+| --- | --- | --- | --- | --- |
+| 0 | 15 | 15 | 8 | 53% |
+| 1 | 15 | 15 | 0 | 0% |
 
-## 6. What this does and does not establish
+Fisher exact p = 0.0022. No attempt was excluded and all 30 exited 0. Each
+attempt's capture records report the intended `context_aware_warnings` value
+in all 19 processes, so the setting did reach the workers.
 
-Established:
-- The warning condition fires on an empty filter list (source).
-- In a real run the config was present and the filter list was empty (capture).
-- The failing stack is a threading-backend worker (capture).
-- A stdlib model of the wrapper corrupts the global filter list under thread
-  interleaving, and context-aware warnings prevent it (probe).
+Supporting runs:
 
-Not established:
-- That the interleaving is what emptied the list in the real run. No capture
-  has recorded the transition (see section 7).
-- That `PYTHON_CONTEXT_AWARE_WARNINGS=1` fixes the real workload. The probe
-  suggests it should; a real-workload comparison is still needed.
-- Any frequency or rate at default scheduling.
+- `runs/20261107T191042Z` (setting on, `--repeat 5`): 0 warnings in 20
+  attempts, 0 of 5 for the relevant configuration. All 205 startup records
+  report the setting as 1. Taken alone this is weak evidence: at a baseline of
+  about one third, 0 of 5 has roughly a 10% chance of occurring anyway.
+- `runs/20261107T185047Z` (setting off): the relevant configuration warned in
+  1 of 3 attempts; the other three configurations did not warn in 9 attempts.
 
-## 7. Defect in the existing diagnostics
+## 5. Assessment of confidence
 
-`capture.py` `TrackingFilters` replaces `warnings.filters` with a list
-subclass. On Python 3.14 (non-context-aware) `catch_warnings.__enter__`
-installs a plain `list` copy, and the tracker is silently gone after the first
-task. Verified on 3.14.4: the type is `list` inside the block and `TrackingFilters`
-is restored only on exit. Consequently "no filter-transition events" in
-`real-filter-trace-20261107T174128Z` is **not** evidence that no transition
-occurred. Replace it with a check at the points that matter (see next steps).
+**Established**
 
-## Next steps
+- The warning fires on an empty filter list (source).
+- In every captured record the configuration was present and the captured
+  filter list was empty, in a threading-backend worker (capture).
+- On this machine and stack, enabling context-aware warnings removed the
+  warning in 15 of 15 attempts, against 8 of 15 with it disabled (A/B).
+- A standard-library model of the wrapper corrupts the global filter list
+  under thread interleaving, and context-aware warnings prevent this (probe).
 
-1. Run the real workload with an in-task check instead of a list subclass:
-   in the traced `warnings.warn`, also record `len(warnings.filters)` per
-   process at every inner-`Parallel` start, so the first drop is captured.
-2. A/B on the real workload, same machine, many repeats:
-   `PYTHON_CONTEXT_AWARE_WARNINGS=0` vs `1`, forest `n_jobs=-1`, grid
-   `n_jobs=-1`. Report warning counts per run, not per call.
-3. Add the real-workload evidence to scikit-learn #35089.
-4. Revise the FAQ entry (separately, with owner approval). See below.
+**Not established**
 
-## Suggested FAQ revision
+- That the thread race is what emptied the list in the real run. The change
+  from 5 filters to an empty list has not been recorded. The A/B shows that the
+  setting removes the symptom; since it changes how `catch_warnings` stores
+  state for every thread, the result is consistent with the race but does not
+  isolate it from other effects.
+- **Open observation 1.** The process-wide filter list was not always empty at
+  warning time: 0 entries in 1,420 records, and 1, 2, 12, 13 or 14 in the
+  other 283. The captured list was empty every time. Something continues to
+  change the global list after the empty capture. This has not been
+  investigated.
+- **Open observation 2.** Warning counts per process were not multiples of 200
+  (2, 27, 54, 75, 122, 171, 200 three times, 252, 400). With 200 trees, 200 per
+  affected `Parallel` call would be expected. Partial counts mean either that
+  not every call in a process captured an empty list, or that records were
+  missed. Neither explanation has been tested.
+- Behaviour outside one machine, Python 3.14.5, scikit-learn 1.9.1, joblib
+  1.6.0, this dataset and this grid. Thirty attempts is a small sample, and the
+  53% rate applies to this setup only.
 
-- Drop Step 1 (`filterwarnings`) as a remedy; explain it cannot work here.
-- State the workaround as environment-specific, with the evidence level from
-  section 6, and link #35089.
-- Keep the note that `n_jobs=1` on the forest avoided the warning in the
-  logged runs, as an observation.
+## 6. Errors in the investigation's own tooling
+
+1. **The filter tracker was blind to the event it was written to detect.**
+   `TrackingFilters` in `capture.py` replaces `warnings.filters` with a list
+   subclass. On Python 3.14 without context-aware warnings,
+   `catch_warnings.__enter__` installs a plain `list` copy, so the tracker is
+   gone after the first task. This was verified on Python 3.14.4.
+2. **A conclusion drawn from that tracker was unsound.** The earlier note that
+   `real-filter-trace-20261107T174128Z` showed "no filter-transition events" was
+   treated as meaningful. It is not evidence that no transition occurred.
+   `INVESTIGATION.md` retains this wording and should be read with that
+   correction.
+3. **An early reading overstated the evidence.** A filter length of 0 at
+   warning time in one record was read as confirming that the global list was
+   empty. Section 5 shows that this holds for most records but not all.
+4. **The first matrix run with the setting on was nearly mistaken for a
+   result.** Zero warnings in 5 attempts is likely by chance (about 10%). The
+   paired comparison was added for this reason.
+
+## 7. Impact
+
+- The published FAQ guidance may mislead readers: it implies a general fix,
+  and it does not say that its first step failed in the tested environment.
+- No effect on model results was found. Best score and parameters were
+  identical across runs (best ROC AUC about 0.99607); the warning is a
+  configuration-propagation message and does not indicate a wrong calculation.
+
+## 8. Corrective actions
+
+| # | Action | Owner | Status |
+| --- | --- | --- | --- |
+| 1 | Publish a runnable reproducer with the estimator, grid, command and traceback requested by the maintainer (section 3) | Author | Done in this report |
+| 2 | Run a controlled comparison rather than rely on a single observation | Author | Done (section 4.5) |
+| 3 | Revise the FAQ entry (below) | Author | **Pending** |
+| 4 | Record the transition from 5 filters to an empty list directly: log `len(warnings._get_filters())` with timestamp, process ID and thread ID at each inner `Parallel` start and in the warning hook. Do not rely on a list subclass | Author | **Pending** |
+| 5 | Investigate open observations 1 and 2 using those records | Author | **Pending** |
+| 6 | Add the real-workload evidence to scikit-learn #35089 | Author | **Pending** |
+| 7 | Annotate `INVESTIGATION.md` with the correction in section 6 | Author | **Pending** |
+
+**Proposed FAQ revision**
+
+- Keep the `filterwarnings` step as the conventional first attempt, but state
+  that it did not work in the tested environment, explain the likely reason
+  (section 4.3), and say that its effect elsewhere is untested.
+- Present `PYTHON_CONTEXT_AWARE_WARNINGS=1` as a workaround that removed the
+  warning in 15 of 15 attempts on one stack (against 8 of 15 without it), not
+  as a general fix, and link #35089.
+- Replace "resolved the warning" with wording that matches the evidence levels
+  in section 5.
+- Keep the observation that a single-threaded forest (`n_jobs=1`) avoided the
+  warning in every logged run.
+- Use a self-contained example with every name defined.
+
+## 9. Evidence index
+
+All paths are relative to `07-midterm/diagnostics/sklearn_parallel_warning/`
+unless noted.
+
+| Item | Location |
+| --- | --- |
+| Controlled comparison | `ab-runs/20261107T193923Z/` (`results.json`, `summary.jsonl`, per-attempt `manifest.json`, `stdout_stderr.log`, `capture/*.jsonl`) |
+| Matrix runs | `runs/20261107T185047Z/` (setting off), `runs/20261107T191042Z/` (setting on) |
+| Earlier real probe | `real-probe-20261107T173304Z/` |
+| Standard-library probe | `thread_filter_race_probe.py`, `probe_default.log`, `probe_context_aware.log` |
+| Comparison script | `ab_context_aware.py` |
+| Reproducer | `../../reproduce_sklearn_parallel_warning.py` |
+| Earlier notes (see section 6 correction) | `INVESTIGATION.md` |
+| Upstream issue | https://github.com/scikit-learn/scikit-learn/issues/35089 |
+
+Interpretation notes: the unit in the comparison is the attempt, not the
+warning count, since one attempt can log hundreds of warnings from a single
+event. A finite set of attempts cannot prove that a configuration never emits
+the warning.
