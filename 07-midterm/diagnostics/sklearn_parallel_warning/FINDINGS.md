@@ -80,7 +80,7 @@ traceback, and whether the code uses `joblib` or scikit-learn's own
 | Estimator | `RandomForestClassifier(random_state=1, n_jobs=-1)` |
 | Parameter grid | `n_estimators=[200]`, `max_depth=[10, 20, None]`, `min_samples_leaf=[1]`, `max_features=["sqrt", 0.5]` |
 | Search | `GridSearchCV(scoring="roc_auc", cv=StratifiedKFold(5, shuffle=True, random_state=1), n_jobs=-1)` |
-| Data | `07-midterm/data/training-dataset.arff`, training split of 8,844 rows and 30 features |
+| Data | `07-midterm/data/training-dataset.arff`: the UCI Phishing Websites dataset (CC BY 4.0, attribution in `07-midterm/data/README.md`), chosen for the author's own midterm project; training split of 8,844 rows and 30 features |
 | Own use of `joblib` / `Parallel` / `delayed` | None. The code uses `GridSearchCV` and `RandomForestClassifier` only; `joblib` is imported solely to print its version |
 | Environment | Python 3.14.5 (GIL build), scikit-learn 1.9.1, joblib 1.6.0, NumPy 2.5.4, SciPy 1.17.1 |
 | Command (single run) | `uv run python 07-midterm/reproduce_sklearn_parallel_warning.py --grid-n-jobs -1 --forest-n-jobs -1 --repeat 3` |
@@ -276,11 +276,11 @@ Supporting runs:
 | --- | --- | --- | --- |
 | 1 | Publish a runnable reproducer with the estimator, grid, command and traceback requested by the maintainer (section 3) | Author | Done in this report |
 | 2 | Run a controlled comparison rather than rely on a single observation | Author | Done (section 4.5) |
-| 3 | Revise the FAQ entry (below) | Author | **Pending** |
+| 3 | Revise the FAQ entry (below) | Author | Done (`07-midterm/07-faq_pr.md`) |
 | 4 | Record the transition from 5 filters to an empty list directly: log `len(warnings._get_filters())` with timestamp, process ID and thread ID at each inner `Parallel` start and in the warning hook. Do not rely on a list subclass | Author | **Pending** |
 | 5 | Investigate open observations 1 and 2 using those records | Author | **Pending** |
 | 6 | Add the real-workload evidence to scikit-learn #35089 | Author | **Pending** |
-| 7 | Annotate `INVESTIGATION.md` with the correction in section 6 | Author | **Pending** |
+| 7 | Annotate `INVESTIGATION.md` with the correction in section 6 | Author | Done |
 
 **Proposed FAQ revision**
 
