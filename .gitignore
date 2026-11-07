@@ -1,0 +1,87 @@
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments (uv creates .venv; the lock file and .python-version
+# ARE tracked on purpose, so reproducibility files are not listed here)
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging / build output
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Tool caches and reports
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyre/
+.hypothesis/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# ---------------------------------------------------------------------------
+# Jupyter
+# ---------------------------------------------------------------------------
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+Untitled*.ipynb
+
+# ---------------------------------------------------------------------------
+# Editors and operating systems
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---------------------------------------------------------------------------
+# Secrets and local configuration - never commit these
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.aws/
+.kaggle/
+
+# ---------------------------------------------------------------------------
+# Downloads and scratch
+# ---------------------------------------------------------------------------
+# wget/curl duplicates such as "data.csv.1", "data.csv.2"
+*.csv.[0-9]
+*.arff.[0-9]
+*.zip.[0-9]
+*.tmp
+*.bak
+
+# ---------------------------------------------------------------------------
+# Deliberately NOT ignored (tracked on purpose)
+# ---------------------------------------------------------------------------
+# *.log     - run logs under 07-midterm/diagnostics/ are evidence that is
+#             shared with others. Ignoring *.log would hide future runs.
+# *.jsonl   - per-process capture records (the primary evidence).
+# *.bin     - 05-deployment/pipeline.bin is used by the Dockerfile.
+# *.csv, *.arff - course datasets.
+# uv.lock, .python-version, pyproject.toml - environment reproducibility.
+#
+# If you generate large throwaway logs, ignore them narrowly, for example:
+#   07-midterm/scratch/
