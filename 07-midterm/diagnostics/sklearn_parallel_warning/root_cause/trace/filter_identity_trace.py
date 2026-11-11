@@ -18,6 +18,11 @@ the *identity* (``id()``) and length of the list involved each time:
 The decisive record is an ``R`` whose list is one that tasks were handed and
 whose length before was non-zero: a thread emptying the stored filter list.
 
+"The list" is always the one in force for the calling thread: the process-wide
+``warnings.filters`` without context-aware warnings, the current context's list
+with them. The same records are therefore written in both modes, and the
+length of the list each task was handed is measured in both.
+
 Design points
 -------------
 - Each operation and its record are made under ``warnings._lock`` (a re-entrant
@@ -57,6 +62,17 @@ _original_reset = warnings.resetwarnings
 _original_warn = warnings.warn
 
 
+def _current():
+    """The filter list in force for this thread.
+
+    Without context-aware warnings this is the process-wide
+    ``warnings.filters``. With them it is the list of the current context
+    (``warnings.filters`` is then not what ``catch_warnings`` swaps).
+    """
+    getter = getattr(warnings, "_get_filters", None)
+    return getter() if getter is not None else warnings.filters
+
+
 def _trace_dir():
     return os.environ.get("FILTER_TRACE_DIR")
 
@@ -85,13 +101,13 @@ class TracedCatchWarnings(_original_catch):
                 and frame.f_code.co_filename.endswith(WRAPPER_FILE_SUFFIX)):
             handed = frame.f_locals.get("warning_filters")
         with warnings._lock:
-            saved = warnings.filters
+            saved = _current()
             saved_len = len(saved)
             log = super().__enter__()
             _events.append({
                 "k": "E", "t": time.monotonic_ns(), "tid": threading.get_ident(),
                 "saved": id(saved), "saved_len": saved_len,
-                "installed": id(warnings.filters),
+                "installed": id(_current()),
                 "handed": id(handed) if handed is not None else None,
                 "handed_len": len(handed) if handed is not None else None,
                 "handed_is_saved": handed is saved if handed is not None else None,
@@ -100,13 +116,13 @@ class TracedCatchWarnings(_original_catch):
 
     def __exit__(self, *exc_info):
         with warnings._lock:
-            leaving = warnings.filters
+            leaving = _current()
             result = super().__exit__(*exc_info)
             _events.append({
                 "k": "X", "t": time.monotonic_ns(), "tid": threading.get_ident(),
                 "left": id(leaving), "left_len": len(leaving),
-                "restored": id(warnings.filters),
-                "restored_len": len(warnings.filters),
+                "restored": id(_current()),
+                "restored_len": len(_current()),
             })
         if threading.get_ident() == _main_ident:
             _flush()
@@ -115,7 +131,7 @@ class TracedCatchWarnings(_original_catch):
 
 def traced_reset():
     with warnings._lock:
-        current = warnings.filters
+        current = _current()
         before = len(current)
         _original_reset()
         _events.append({
@@ -128,7 +144,7 @@ def traced_warn(message, category=None, stacklevel=1, source=None, **kwargs):
     if TARGET_WARNING in str(message):
         frame = sys._getframe(1)
         handed = frame.f_locals.get("warning_filters")
-        current = warnings.filters
+        current = _current()
         _events.append({
             "k": "W", "t": time.monotonic_ns(), "tid": threading.get_ident(),
             "handed": id(handed) if handed is not None else None,
@@ -182,16 +198,13 @@ def install():
         "k": "START", "t": time.monotonic_ns(), "pid": os.getpid(),
         "python": sys.version.split()[0],
         "context_aware_warnings": getattr(sys.flags, "context_aware_warnings", None),
-        "initial_filters": len(warnings.filters),
+        "initial_filters": len(_current()),
+        "trace_version": 2,
         "snapshot_patch": snapshot,
         "argv0": sys.argv[0] if sys.argv else None,
     })
-    if not getattr(sys.flags, "context_aware_warnings", 0):
-        # With context-aware warnings the filters are per-context and
-        # warnings.filters is not what catch_warnings swaps; only the warning
-        # itself is recorded in that mode.
-        warnings.catch_warnings = TracedCatchWarnings
-        warnings.resetwarnings = traced_reset
+    warnings.catch_warnings = TracedCatchWarnings
+    warnings.resetwarnings = traced_reset
     warnings.warn = traced_warn
     if snapshot:
         _install_snapshot_patch()

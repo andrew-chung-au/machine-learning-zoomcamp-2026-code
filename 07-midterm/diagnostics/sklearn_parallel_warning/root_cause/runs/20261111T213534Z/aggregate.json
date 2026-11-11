@@ -1,0 +1,210 @@
+{
+  "baseline": {
+    "attempts": 15,
+    "attempts_with_warning": 9,
+    "attempts_with_warning_shown": 9,
+    "attempts_with_filter_corruption": 13,
+    "attempts_with_decisive_reset": 6,
+    "processes_traced": 285,
+    "processes_with_warning": 16,
+    "wrapper_tasks_in_threads": 183000,
+    "inner_calls": 915,
+    "target_warnings": 3509,
+    "target_warning_lines_shown": 3436,
+    "target_warnings_config_present": 3509,
+    "warnings_accounted_for": 3509,
+    "outer_task_warnings": 0,
+    "warnings_where_handed_list_was_global": 586,
+    "calls_by_cause": {
+      "emptied_during_call": 8,
+      "captured_already_empty": 13,
+      "captured_shortened_no_warning": 10,
+      "UNEXPLAINED": 0
+    },
+    "warnings_by_cause": {
+      "emptied_during_call": 909,
+      "captured_already_empty": 2600,
+      "captured_shortened_no_warning": 0,
+      "UNEXPLAINED": 0
+    },
+    "warning_handed_len": {
+      "0": 3509
+    },
+    "warning_global_len": {
+      "0": 3162,
+      "1": 10,
+      "2": 6,
+      "12": 331
+    },
+    "warnings_per_process": {
+      "2": 1,
+      "141": 1,
+      "143": 1,
+      "151": 1,
+      "200": 9,
+      "368": 1,
+      "382": 1,
+      "522": 1
+    },
+    "tasks_with_shortened_list_no_warning": 2304,
+    "decisive_resets": 9,
+    "decisive_resets_in_expected_order": 9,
+    "decisive_resets_list_made_global_by_other_thread": 9,
+    "decisive_reset_enter_to_reset_us": [
+      1607,
+      2566,
+      6247,
+      19093,
+      20259,
+      26005,
+      26816,
+      160535,
+      208295
+    ],
+    "captures_of_empty_or_shortened_list": 23,
+    "captures_left_global_by_worker_thread_exit": 23,
+    "captures_list_created_by_worker_thread": 23,
+    "usual_filter_list_length": {
+      "12": 15
+    },
+    "median_wall_seconds": 13.08
+  },
+  "context_aware": {
+    "attempts": 15,
+    "attempts_with_warning": 0,
+    "attempts_with_warning_shown": 0,
+    "attempts_with_filter_corruption": 0,
+    "attempts_with_decisive_reset": 0,
+    "processes_traced": 285,
+    "processes_with_warning": 0,
+    "wrapper_tasks_in_threads": 0,
+    "inner_calls": 0,
+    "target_warnings": 0,
+    "target_warning_lines_shown": 0,
+    "target_warnings_config_present": 0,
+    "warnings_accounted_for": 0,
+    "outer_task_warnings": 0,
+    "warnings_where_handed_list_was_global": 0,
+    "calls_by_cause": {
+      "emptied_during_call": 0,
+      "captured_already_empty": 0,
+      "captured_shortened_no_warning": 0,
+      "UNEXPLAINED": 0
+    },
+    "warnings_by_cause": {
+      "emptied_during_call": 0,
+      "captured_already_empty": 0,
+      "captured_shortened_no_warning": 0,
+      "UNEXPLAINED": 0
+    },
+    "warning_handed_len": {},
+    "warning_global_len": {},
+    "warnings_per_process": {},
+    "tasks_with_shortened_list_no_warning": 0,
+    "decisive_resets": 0,
+    "decisive_resets_in_expected_order": 0,
+    "decisive_resets_list_made_global_by_other_thread": 0,
+    "decisive_reset_enter_to_reset_us": [],
+    "captures_of_empty_or_shortened_list": 0,
+    "captures_left_global_by_worker_thread_exit": 0,
+    "captures_list_created_by_worker_thread": 0,
+    "usual_filter_list_length": {
+      "0": 15
+    },
+    "median_wall_seconds": 12.94
+  },
+  "forest_single": {
+    "attempts": 15,
+    "attempts_with_warning": 0,
+    "attempts_with_warning_shown": 0,
+    "attempts_with_filter_corruption": 0,
+    "attempts_with_decisive_reset": 0,
+    "processes_traced": 285,
+    "processes_with_warning": 0,
+    "wrapper_tasks_in_threads": 0,
+    "inner_calls": 0,
+    "target_warnings": 0,
+    "target_warning_lines_shown": 0,
+    "target_warnings_config_present": 0,
+    "warnings_accounted_for": 0,
+    "outer_task_warnings": 0,
+    "warnings_where_handed_list_was_global": 0,
+    "calls_by_cause": {
+      "emptied_during_call": 0,
+      "captured_already_empty": 0,
+      "captured_shortened_no_warning": 0,
+      "UNEXPLAINED": 0
+    },
+    "warnings_by_cause": {
+      "emptied_during_call": 0,
+      "captured_already_empty": 0,
+      "captured_shortened_no_warning": 0,
+      "UNEXPLAINED": 0
+    },
+    "warning_handed_len": {},
+    "warning_global_len": {},
+    "warnings_per_process": {},
+    "tasks_with_shortened_list_no_warning": 0,
+    "decisive_resets": 0,
+    "decisive_resets_in_expected_order": 0,
+    "decisive_resets_list_made_global_by_other_thread": 0,
+    "decisive_reset_enter_to_reset_us": [],
+    "captures_of_empty_or_shortened_list": 0,
+    "captures_left_global_by_worker_thread_exit": 0,
+    "captures_list_created_by_worker_thread": 0,
+    "usual_filter_list_length": {
+      "0": 15
+    },
+    "median_wall_seconds": 13.38
+  },
+  "snapshot_patch": {
+    "attempts": 15,
+    "attempts_with_warning": 6,
+    "attempts_with_warning_shown": 6,
+    "attempts_with_filter_corruption": 12,
+    "attempts_with_decisive_reset": 0,
+    "processes_traced": 285,
+    "processes_with_warning": 7,
+    "wrapper_tasks_in_threads": 183000,
+    "inner_calls": 915,
+    "target_warnings": 1400,
+    "target_warning_lines_shown": 1284,
+    "target_warnings_config_present": 1400,
+    "warnings_accounted_for": 1400,
+    "outer_task_warnings": 0,
+    "warnings_where_handed_list_was_global": 0,
+    "calls_by_cause": {
+      "emptied_during_call": 0,
+      "captured_already_empty": 7,
+      "captured_shortened_no_warning": 15,
+      "UNEXPLAINED": 0
+    },
+    "warnings_by_cause": {
+      "emptied_during_call": 0,
+      "captured_already_empty": 1400,
+      "captured_shortened_no_warning": 0,
+      "UNEXPLAINED": 0
+    },
+    "warning_handed_len": {
+      "0": 1400
+    },
+    "warning_global_len": {
+      "0": 1400
+    },
+    "warnings_per_process": {
+      "200": 7
+    },
+    "tasks_with_shortened_list_no_warning": 3000,
+    "decisive_resets": 0,
+    "decisive_resets_in_expected_order": 0,
+    "decisive_resets_list_made_global_by_other_thread": 0,
+    "decisive_reset_enter_to_reset_us": [],
+    "captures_of_empty_or_shortened_list": 22,
+    "captures_left_global_by_worker_thread_exit": 0,
+    "captures_list_created_by_worker_thread": 0,
+    "usual_filter_list_length": {
+      "12": 15
+    },
+    "median_wall_seconds": 13.67
+  }
+}

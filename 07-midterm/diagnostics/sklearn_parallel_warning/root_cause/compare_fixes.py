@@ -9,6 +9,11 @@ Arms (one fresh process tree per attempt, order rotated every round):
                     search keeps its worker processes, the forest uses no threads
     snapshot_patch  as baseline, plus the test-only patch that hands tasks a
                     copy of the filter list (candidate upstream change)
+    user_filter     as baseline, plus the user's own targeted
+                    warnings.filterwarnings("ignore", ...) for this warning
+                    (not run by default; select it with --arms). In this arm
+                    "raised" (traced) and "shown" (lines in the output) differ
+                    if the filter suppresses anything
 
 Every attempt is traced (``trace/filter_identity_trace.py``) and analysed
 (``analyze_trace.py``). Two outcomes are recorded per attempt:
@@ -63,7 +68,11 @@ ARMS = {
     "context_aware": {"context_aware": 1, "forest_single": False, "snapshot": False},
     "forest_single": {"context_aware": 0, "forest_single": True, "snapshot": False},
     "snapshot_patch": {"context_aware": 0, "forest_single": False, "snapshot": True},
+    # Not a default arm: the user's own targeted "ignore" filter.
+    "user_filter": {"context_aware": 0, "forest_single": False, "snapshot": False,
+                    "user_filter": True},
 }
+DEFAULT_ARMS = ["baseline", "context_aware", "forest_single", "snapshot_patch"]
 WARNING_LINE = "UserWarning: `sklearn.utils.parallel.delayed` should be used with"
 
 
@@ -95,6 +104,8 @@ def run_attempt(index, arm, run_root, grid_n_jobs, forest_n_jobs, trace=True):
         "--forest-n-jobs", str(forest),
         "--repeat", "1",
     ]
+    if spec.get("user_filter"):
+        command.append("--user-filter")
     env = os.environ.copy()
     env["PYTHON_CONTEXT_AWARE_WARNINGS"] = str(spec["context_aware"])
     env.pop("PYTHONWARNINGS", None)  # a user filter would confound the test
@@ -192,7 +203,8 @@ def main():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--rounds", type=int, default=10,
                         help="attempts per arm")
-    parser.add_argument("--arms", nargs="+", choices=list(ARMS), default=list(ARMS))
+    parser.add_argument("--arms", nargs="+", choices=list(ARMS),
+                        default=list(DEFAULT_ARMS))
     parser.add_argument("--grid-n-jobs", type=int, default=-1)
     parser.add_argument("--forest-n-jobs", type=int, default=-1)
     parser.add_argument("--output-root", type=Path, default=HERE / "runs")
@@ -207,7 +219,7 @@ def main():
     if "baseline" not in args.arms:
         parser.error("the baseline arm is required for the comparison")
     if args.no_trace and "snapshot_patch" in args.arms:
-        if args.arms == list(ARMS):
+        if args.arms == DEFAULT_ARMS:
             args.arms.remove("snapshot_patch")
         else:
             parser.error("the snapshot arm needs the tracer")
@@ -255,6 +267,10 @@ def main():
             "with_filter_corruption": sum(
                 bool(m["filter_corruption_observed"]) for m in valid),
             "target_warnings": sum(m["target_warnings_traced"] for m in valid),
+            "target_warning_lines_shown": sum(
+                m["target_warning_lines_in_log"] for m in valid),
+            "attempts_with_warning_shown": sum(
+                bool(m["target_warning_lines_in_log"]) for m in valid),
             "warnings_accounted_for": sum(
                 m["warnings_accounted_for"] for m in valid),
             "decisive_resets": sum(m["decisive_resets"] for m in valid),
@@ -281,7 +297,8 @@ def main():
           f"tracer {'off' if args.no_trace else 'on'})")
     print("=" * 86)
     print(f"{'arm':<16}{'valid':>6}{'warned':>8}{'corrupted':>11}"
-          f"{'p(warn)':>10}{'p(corrupt)':>12}{'median s':>10}")
+          f"{'p(warn)':>10}{'p(corrupt)':>12}{'raised':>8}{'shown':>7}"
+          f"{'median s':>10}")
     for arm, row in table.items():
         pw = row.get("fisher_p_warning_vs_baseline")
         pc = row.get("fisher_p_corruption_vs_baseline")
@@ -293,13 +310,16 @@ def main():
               f"{row['with_filter_corruption']!s:>11}"
               f"{(f'{pw:.4f}' if pw is not None else '-'):>10}"
               f"{(f'{pc:.4f}' if pc is not None else '-'):>12}"
+              f"{(row['target_warnings'] if not args.no_trace else 'n/a')!s:>8}"
+              f"{row['target_warning_lines_shown']:>7}"
               f"{row['median_wall_seconds']!s:>10}")
     excluded = [m["attempt"] for m in manifests if m["status"] not in valid_states]
     if excluded:
         print(f"\nExcluded (failed or invalid): {', '.join(excluded)}")
     print("\n'warned': attempts with the target warning. 'corrupted': attempts in "
           "which a task ran\nwith an emptied or shortened filter list (includes "
-          "silent cases). p-values: Fisher\nexact, two-sided, against baseline."
+          "silent cases). p-values: Fisher\nexact, two-sided, against baseline. 'raised': calls of the target\nwarning "
+          "(traced). 'shown': warning lines printed by the workload."
           + ("" if args.no_trace else " Wall time includes tracing overhead."))
 
     (run_root / "results.json").write_text(json.dumps({

@@ -70,6 +70,16 @@ def parse_args():
             "to raise when a fit fails, for diagnostic runs."
         ),
     )
+    parser.add_argument(
+        "--user-filter",
+        action="store_true",
+        help=(
+            "Install the targeted warnings.filterwarnings('ignore', ...) "
+            "filter for this warning before fitting, as a user would, and "
+            "do not record warnings in this process. Tests whether an "
+            "ordinary warning filter suppresses the warning."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -116,7 +126,10 @@ def load_data():
     return X, y, cv, data_path
 
 
-def run_search(X, y, cv, grid_n_jobs, forest_n_jobs, run_number, warning_mode):
+def run_search(
+    X, y, cv, grid_n_jobs, forest_n_jobs, run_number, warning_mode,
+    user_filter=False,
+):
     grid = {
         "n_estimators": [200],
         "max_depth": [10, 20, None],
@@ -144,6 +157,26 @@ def run_search(X, y, cv, grid_n_jobs, forest_n_jobs, run_number, warning_mode):
         n_jobs=grid_n_jobs,
         error_score="raise" if warning_mode == "error" else np.nan,
     )
+
+    if user_filter:
+        # What a user would try first: a targeted "ignore" filter, set once in
+        # the main process. No recorder here, because its "always" filter
+        # would take precedence over the user's filter.
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*sklearn\.utils\.parallel\.delayed.*",
+            category=UserWarning,
+        )
+        print("User filter installed: ignore the target warning.", flush=True)
+        search.fit(X, y)
+        print("RESULT: fit completed.", flush=True)
+        print(f"Best score: {search.best_score_}", flush=True)
+        print(f"Best parameters: {search.best_params_}", flush=True)
+        print(
+            "Any target warning printed above was shown despite the filter.",
+            flush=True,
+        )
+        return
 
     # This recorder captures warnings in this process. It cannot be relied
     # upon to collect warnings emitted separately by joblib worker processes.
@@ -244,6 +277,7 @@ def main():
                     forest_n_jobs=forest_n_jobs,
                     run_number=run_number,
                     warning_mode=args.warning_mode,
+                    user_filter=args.user_filter,
                 )
 
 

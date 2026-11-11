@@ -85,8 +85,10 @@ call's tasks.
   operation, so it can change how often the race happens. It cannot change
   which list an operation acts on. The untraced control in `ROOT_CAUSE.md`
   shows the warning also occurs without it.
-- With `PYTHON_CONTEXT_AWARE_WARNINGS=1` only the warning itself is recorded,
-  because filters are then stored per context and `warnings.filters` is not
-  what `catch_warnings` swaps.
+- With `PYTHON_CONTEXT_AWARE_WARNINGS=1` filters are stored per context, so
+  "the list" in a record is the list of the calling thread's context. The
+  first comparison run (`runs/20261111T213534Z`) used an earlier tracer that
+  recorded only the warning itself in that mode; its `context_aware` row
+  therefore measures warnings but not filter-list corruption.
 - `--snapshot` and `FILTER_TRACE_SNAPSHOT=1` are test arms for a possible
   upstream change. They are not advice for users.
