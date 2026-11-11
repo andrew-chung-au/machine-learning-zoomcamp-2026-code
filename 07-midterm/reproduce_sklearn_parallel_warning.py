@@ -22,6 +22,13 @@ TARGET_WARNING = (
 )
 
 
+def n_jobs_value(text):
+    value = int(text)
+    if value != -1 and value < 1:
+        raise argparse.ArgumentTypeError("n_jobs must be -1 or a positive integer")
+    return value
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Reproduce the scikit-learn parallel-processing warning."
@@ -29,18 +36,24 @@ def parse_args():
     parser.add_argument(
         "--grid-n-jobs",
         nargs="+",
-        type=int,
-        choices=[1, -1],
+        type=n_jobs_value,
         default=[-1],
-        help="GridSearchCV n_jobs values to test.",
+        help=(
+            "GridSearchCV n_jobs values to test: -1 (all cores) or a "
+            "positive number of worker processes."
+        ),
     )
     parser.add_argument(
         "--forest-n-jobs",
         nargs="+",
-        type=int,
-        choices=[1, -1],
+        type=n_jobs_value,
         default=[1, -1],
-        help="RandomForestClassifier n_jobs values to test.",
+        help=(
+            "RandomForestClassifier n_jobs values to test: -1 (all cores) "
+            "or a positive number of threads. An explicit number lets a "
+            "small machine use the same process/thread layout as a larger "
+            "one (for example 16 and 16)."
+        ),
     )
     parser.add_argument(
         "--repeat",
