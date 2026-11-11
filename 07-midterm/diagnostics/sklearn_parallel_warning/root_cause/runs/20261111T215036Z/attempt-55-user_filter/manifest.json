@@ -1,0 +1,61 @@
+{
+  "attempt": "attempt-55-user_filter",
+  "arm": "user_filter",
+  "spec": {
+    "context_aware": 0,
+    "forest_single": false,
+    "snapshot": false,
+    "user_filter": true
+  },
+  "traced": true,
+  "started_utc": "2026-11-11T22:02:44.494521+00:00",
+  "wall_seconds": 13.27,
+  "command": [
+    "/home/user/machine-learning-zoomcamp-2026-code/.venv/bin/python3",
+    "-u",
+    "/home/user/machine-learning-zoomcamp-2026-code/07-midterm/reproduce_sklearn_parallel_warning.py",
+    "--grid-n-jobs",
+    "16",
+    "--forest-n-jobs",
+    "16",
+    "--repeat",
+    "1",
+    "--user-filter"
+  ],
+  "exit_code": 0,
+  "grid_n_jobs": 16,
+  "forest_n_jobs": 16,
+  "processes_traced": 19,
+  "observed_context_aware_warnings": [
+    0
+  ],
+  "observed_snapshot_patch": [
+    false
+  ],
+  "target_warnings_traced": 393,
+  "target_warning_lines_in_log": 295,
+  "warnings_accounted_for": 393,
+  "calls_by_cause": {
+    "emptied_during_call": 2,
+    "captured_already_empty": 1,
+    "captured_shortened_no_warning": 0,
+    "UNEXPLAINED": 0
+  },
+  "warnings_by_cause": {
+    "emptied_during_call": 193,
+    "captured_already_empty": 200,
+    "captured_shortened_no_warning": 0,
+    "UNEXPLAINED": 0
+  },
+  "decisive_resets": 2,
+  "tasks_with_shortened_list_no_warning": 0,
+  "filter_corruption_observed": true,
+  "wrapper_tasks_in_threads": 12200,
+  "best_score_line": "Best score: 0.9960725525018969",
+  "status": "warning_observed",
+  "raw_traces_kept": [
+    "trace-28713.jsonl.gz",
+    "trace-28717.jsonl.gz",
+    "trace-28718.jsonl.gz"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "attempt": "attempt-69-context_aware",
+  "arm": "context_aware",
+  "spec": {
+    "context_aware": 1,
+    "forest_single": false,
+    "snapshot": false
+  },
+  "traced": true,
+  "started_utc": "2026-11-11T22:05:53.854659+00:00",
+  "wall_seconds": 12.57,
+  "command": [
+    "/home/user/machine-learning-zoomcamp-2026-code/.venv/bin/python3",
+    "-u",
+    "/home/user/machine-learning-zoomcamp-2026-code/07-midterm/reproduce_sklearn_parallel_warning.py",
+    "--grid-n-jobs",
+    "16",
+    "--forest-n-jobs",
+    "16",
+    "--repeat",
+    "1"
+  ],
+  "exit_code": 0,
+  "grid_n_jobs": 16,
+  "forest_n_jobs": 16,
+  "processes_traced": 19,
+  "observed_context_aware_warnings": [
+    1
+  ],
+  "observed_snapshot_patch": [
+    false
+  ],
+  "target_warnings_traced": 0,
+  "target_warning_lines_in_log": 0,
+  "warnings_accounted_for": 0,
+  "calls_by_cause": {
+    "emptied_during_call": 0,
+    "captured_already_empty": 0,
+    "captured_shortened_no_warning": 0,
+    "UNEXPLAINED": 0
+  },
+  "warnings_by_cause": {
+    "emptied_during_call": 0,
+    "captured_already_empty": 0,
+    "captured_shortened_no_warning": 0,
+    "UNEXPLAINED": 0
+  },
+  "decisive_resets": 0,
+  "tasks_with_shortened_list_no_warning": 0,
+  "filter_corruption_observed": false,
+  "wrapper_tasks_in_threads": 12200,
+  "best_score_line": "Best score: 0.9960725525018969",
+  "status": "no_warning_observed",
+  "raw_traces_kept": []
+}
