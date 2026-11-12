@@ -1,0 +1,440 @@
+{
+ "trace_files": 19,
+ "processes_with_warning": 3,
+ "wrapper_tasks_in_threads": 12200,
+ "inner_calls": 61,
+ "usual_filter_list_length": 12,
+ "target_warnings": 600,
+ "target_warnings_config_present": 600,
+ "warning_handed_len": {
+  "0": 600
+ },
+ "warning_global_len": {
+  "0": 600
+ },
+ "warnings_where_handed_list_was_global": 0,
+ "calls_by_cause": {
+  "emptied_during_call": 0,
+  "captured_already_empty": 3,
+  "captured_shortened_no_warning": 0,
+  "UNEXPLAINED": 0
+ },
+ "warnings_by_cause": {
+  "emptied_during_call": 0,
+  "captured_already_empty": 600,
+  "captured_shortened_no_warning": 0,
+  "UNEXPLAINED": 0
+ },
+ "outer_task_warnings": 0,
+ "tasks_with_shortened_list_no_warning": 0,
+ "warnings_accounted_for": 600,
+ "decisive_resets": [],
+ "captures": [
+  {
+   "left_global_by_worker_thread_exit": false,
+   "length_when_left_global": 0,
+   "created_by_worker_thread": false,
+   "created_as_copy_of_list_with_len": null
+  },
+  {
+   "left_global_by_worker_thread_exit": false,
+   "length_when_left_global": 0,
+   "created_by_worker_thread": false,
+   "created_as_copy_of_list_with_len": null
+  },
+  {
+   "left_global_by_worker_thread_exit": false,
+   "length_when_left_global": 0,
+   "created_by_worker_thread": false,
+   "created_as_copy_of_list_with_len": null
+  }
+ ],
+ "affected_calls": [
+  {
+   "handed": 130678666515776,
+   "first_index": 5978,
+   "last_index": 6762,
+   "tasks": 200,
+   "tasks_handed_empty": 200,
+   "tasks_handed_shortened": 0,
+   "first_task_handed_len": 0,
+   "handed_was_global_at_first_task": null,
+   "warnings": 200,
+   "pid": 8956,
+   "file": "trace-8956.jsonl.gz",
+   "full_len": 12,
+   "cause": "captured_already_empty",
+   "capture": {
+    "left_global_by_worker_thread_exit": false,
+    "length_when_left_global": 0,
+    "created_by_worker_thread": false,
+    "created_as_copy_of_list_with_len": null
+   }
+  },
+  {
+   "handed": 136902833966400,
+   "first_index": 5978,
+   "last_index": 6763,
+   "tasks": 200,
+   "tasks_handed_empty": 200,
+   "tasks_handed_shortened": 0,
+   "first_task_handed_len": 0,
+   "handed_was_global_at_first_task": null,
+   "warnings": 200,
+   "pid": 8957,
+   "file": "trace-8957.jsonl.gz",
+   "full_len": 12,
+   "cause": "captured_already_empty",
+   "capture": {
+    "left_global_by_worker_thread_exit": false,
+    "length_when_left_global": 0,
+    "created_by_worker_thread": false,
+    "created_as_copy_of_list_with_len": null
+   }
+  },
+  {
+   "handed": 130788719048576,
+   "first_index": 2683,
+   "last_index": 3463,
+   "tasks": 200,
+   "tasks_handed_empty": 200,
+   "tasks_handed_shortened": 0,
+   "first_task_handed_len": 0,
+   "handed_was_global_at_first_task": null,
+   "warnings": 200,
+   "pid": 8958,
+   "file": "trace-8958.jsonl.gz",
+   "full_len": 12,
+   "cause": "captured_already_empty",
+   "capture": {
+    "left_global_by_worker_thread_exit": false,
+    "length_when_left_global": 0,
+    "created_by_worker_thread": false,
+    "created_as_copy_of_list_with_len": null
+   }
+  }
+ ],
+ "affected_files": [
+  "trace-8956.jsonl.gz",
+  "trace-8957.jsonl.gz",
+  "trace-8958.jsonl.gz"
+ ],
+ "processes": [
+  {
+   "file": "trace-8910.jsonl",
+   "pid": 8910,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 2747,
+   "inner_calls": 1,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 200,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8952.jsonl",
+   "pid": 8952,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 37,
+   "inner_calls": 0,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 0,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8953.jsonl",
+   "pid": 8953,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 37,
+   "inner_calls": 0,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 0,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8954.jsonl",
+   "pid": 8954,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8955.jsonl",
+   "pid": 8955,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8956.jsonl",
+   "pid": 8956,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6827,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 200,
+   "warnings_config_present": 200,
+   "warnings_handed_len": {
+    "0": 200
+   },
+   "warnings_global_len": {
+    "0": 200
+   },
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8957.jsonl",
+   "pid": 8957,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6827,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 200,
+   "warnings_config_present": 200,
+   "warnings_handed_len": {
+    "0": 200
+   },
+   "warnings_global_len": {
+    "0": 200
+   },
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8958.jsonl",
+   "pid": 8958,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 3532,
+   "inner_calls": 2,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 400,
+   "warnings": 200,
+   "warnings_config_present": 200,
+   "warnings_handed_len": {
+    "0": 200
+   },
+   "warnings_global_len": {
+    "0": 200
+   },
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8959.jsonl",
+   "pid": 8959,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8960.jsonl",
+   "pid": 8960,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8961.jsonl",
+   "pid": 8961,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8962.jsonl",
+   "pid": 8962,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8963.jsonl",
+   "pid": 8963,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8964.jsonl",
+   "pid": 8964,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8965.jsonl",
+   "pid": 8965,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8966.jsonl",
+   "pid": 8966,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 3332,
+   "inner_calls": 2,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 400,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8967.jsonl",
+   "pid": 8967,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8968.jsonl",
+   "pid": 8968,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  },
+  {
+   "file": "trace-8969.jsonl",
+   "pid": 8969,
+   "context_aware_warnings": 0,
+   "snapshot_patch": true,
+   "events": 6627,
+   "inner_calls": 4,
+   "outer_task_warnings": 0,
+   "full_filter_len": 12,
+   "wrapper_tasks_in_threads": 800,
+   "warnings": 0,
+   "warnings_config_present": 0,
+   "warnings_handed_len": {},
+   "warnings_global_len": {},
+   "warnings_handed_is_global": 0
+  }
+ ]
+}

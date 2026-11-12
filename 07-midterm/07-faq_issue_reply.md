@@ -1,9 +1,3 @@
-<!--
-Draft reply for https://github.com/DataTalksClub/faq/issues/551
-Not posted. The links point to the main branch, so merge the branch with the
-root-cause work before posting. Delete this comment block when posting.
--->
-
 Update: I have now observed the cause directly, and the recommended fix in the entry has changed.
 
 **Cause**
@@ -32,7 +26,7 @@ With `PYTHON_CONTEXT_AWARE_WARNINGS=1` the same script emits no warning and the 
 
 **Real workload**
 
-I traced which list object every `catch_warnings` entry, exit and `resetwarnings()` acted on, in the main process and all joblib workers, during the same `GridSearchCV` over `RandomForestClassifier` as before. All 9,190 warnings in the baseline runs were traced to a recorded event in which a worker thread emptied a filter list that other tasks were using. None was left unexplained.
+Every catch_warnings entry, exit and resetwarnings() call was traced to the list object it acted on, across the main process and all joblib workers, during the same GridSearchCV over RandomForestClassifier as before. All 9,190 warnings in the baseline runs were accounted for by recorded events in which a worker thread emptied a filter list shared with other tasks. None remained unexplained.
 
 | Setup (fresh process per run) | Runs with the warning |
 | --- | --- |
