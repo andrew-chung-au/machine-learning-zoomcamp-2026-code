@@ -1,0 +1,37 @@
+{
+  "run_id": "20261112T035229Z",
+  "rounds": 15,
+  "traced": true,
+  "grid_n_jobs": -1,
+  "forest_n_jobs": -1,
+  "cpu_count": 16,
+  "arms": {
+    "baseline": {
+      "attempts": 15,
+      "valid": 15,
+      "with_warning": 13,
+      "with_filter_corruption": 15,
+      "target_warnings": 5405,
+      "target_warning_lines_shown": 3329,
+      "attempts_with_warning_shown": 13,
+      "warnings_accounted_for": 5405,
+      "decisive_resets": 14,
+      "median_wall_seconds": 11.0
+    },
+    "user_filter": {
+      "attempts": 15,
+      "valid": 15,
+      "with_warning": 11,
+      "with_filter_corruption": 14,
+      "target_warnings": 3482,
+      "target_warning_lines_shown": 2016,
+      "attempts_with_warning_shown": 11,
+      "warnings_accounted_for": 3482,
+      "decisive_resets": 18,
+      "median_wall_seconds": 11.1,
+      "fisher_p_warning_vs_baseline": 0.6513409961685824,
+      "fisher_p_corruption_vs_baseline": 1.0
+    }
+  },
+  "excluded": []
+}

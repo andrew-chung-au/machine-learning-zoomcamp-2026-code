@@ -1,0 +1,49 @@
+{
+  "run_id": "20261112T040023Z",
+  "rounds": 10,
+  "traced": false,
+  "grid_n_jobs": -1,
+  "forest_n_jobs": -1,
+  "cpu_count": 16,
+  "arms": {
+    "baseline": {
+      "attempts": 10,
+      "valid": 10,
+      "with_warning": 3,
+      "with_filter_corruption": "n/a",
+      "target_warnings": 0,
+      "target_warning_lines_shown": 341,
+      "attempts_with_warning_shown": 3,
+      "warnings_accounted_for": 0,
+      "decisive_resets": 0,
+      "median_wall_seconds": 10.6
+    },
+    "context_aware": {
+      "attempts": 10,
+      "valid": 10,
+      "with_warning": 0,
+      "with_filter_corruption": "n/a",
+      "target_warnings": 0,
+      "target_warning_lines_shown": 0,
+      "attempts_with_warning_shown": 0,
+      "warnings_accounted_for": 0,
+      "decisive_resets": 0,
+      "median_wall_seconds": 11.0,
+      "fisher_p_warning_vs_baseline": 0.21052631578947367
+    },
+    "forest_single": {
+      "attempts": 10,
+      "valid": 10,
+      "with_warning": 0,
+      "with_filter_corruption": "n/a",
+      "target_warnings": 0,
+      "target_warning_lines_shown": 0,
+      "attempts_with_warning_shown": 0,
+      "warnings_accounted_for": 0,
+      "decisive_resets": 0,
+      "median_wall_seconds": 9.9,
+      "fisher_p_warning_vs_baseline": 0.21052631578947367
+    }
+  },
+  "excluded": []
+}
