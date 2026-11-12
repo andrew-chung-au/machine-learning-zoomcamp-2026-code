@@ -8,7 +8,7 @@ I can reproduce this on a GIL build with an ordinary workload and the default sw
 
 **Setup.** Python 3.14.6 (GIL build), scikit-learn 1.9.1, joblib 1.6.0. `GridSearchCV(n_jobs=16)` over `RandomForestClassifier(n_estimators=200, n_jobs=16)`, 6 candidates, 5 folds, 8,844 rows and 30 features, on a 4-core machine. No `sys.setswitchinterval`. One fresh process tree per attempt.
 
-**Rate.** The `delayed` / `Parallel` warning appeared in 21 of 30 attempts with a tracer loaded and in 5 of 10 without it. With `PYTHON_CONTEXT_AWARE_WARNINGS=1`: 0 of 30 and 0 of 10. With `RandomForestClassifier(n_jobs=1)` inside the same grid search: 0 of 30 and 0 of 10. It depends on the layout: with 4 worker processes of 4 threads each I saw none in 10 attempts, and none in 8 with a sequential grid search and 16 forest threads.
+**Rate.** The `delayed` / `Parallel` warning appeared in 21 of 30 attempts with a tracer loaded and in 5 of 10 without it. With `PYTHON_CONTEXT_AWARE_WARNINGS=1`: 0 of 30 and 0 of 10. With `RandomForestClassifier(n_jobs=1)` inside the same grid search: 0 of 30 and 0 of 10. On a 16-core machine (Python 3.14.5) with plain `n_jobs=-1` for both levels: 13 of 15, against 0 of 15 for each of the two changes. It depends on the layout: with 4 worker processes of 4 threads each I saw none in 10 attempts, and none in 8 with a sequential grid search and 16 forest threads.
 
 **Trace.** The tracer records, under `warnings._lock`, the `id()` and length of the list each `catch_warnings.__enter__`, `catch_warnings.__exit__` and `resetwarnings()` acts on, plus the list each `_FuncWrapper` task was handed. In the 30 baseline attempts (366,000 thread tasks, 1,830 thread-backed `Parallel` calls) all 9,190 warnings fall into two paths:
 

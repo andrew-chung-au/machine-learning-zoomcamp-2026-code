@@ -55,7 +55,7 @@ In the second situation the warning is intermittent (a clean run does not mean t
 
 **Option 1 (recommended, any Python version): parallelise at one level only.**
 
-Keep `n_jobs=-1` on `GridSearchCV` and remove `n_jobs` from the model, as in the example above. Without threads inside the workers there is nothing to overwrite. The grid search still uses every core. In the tests this was not slower than making both parallel (12.7 s against 13.1 s, and 8.7 s against 9.1 s, on a 4-core machine).
+Keep `n_jobs=-1` on `GridSearchCV` and remove `n_jobs` from the model, as in the example above. Without threads inside the workers there is nothing to overwrite. The grid search still uses every core. In the tests this was not slower than making both parallel (10.5 s against 11.1 s on a 16-core machine, 12.7 s against 13.1 s on a 4-core machine).
 
 If you fit a single model without a grid search, `n_jobs=-1` on the model alone is fine. The warning was not seen in that layout in 8 test runs.
 
@@ -101,21 +101,21 @@ This is the usual first attempt, and it fails here for the same reason the warni
 
 **Evidence**
 
-`GridSearchCV` over `RandomForestClassifier` on the [UCI Phishing Websites dataset](https://archive.ics.uci.edu/dataset/327/phishing), a fresh Python process for every run, 16 worker processes with 16 forest threads each:
+`GridSearchCV` over `RandomForestClassifier` on the [UCI Phishing Websites dataset](https://archive.ics.uci.edu/dataset/327/phishing), a fresh Python process for every run, 16 worker processes with 16 forest threads each. Machine A has 16 cores and used plain `n_jobs=-1`; machine B has 4 cores and was given the same layout explicitly.
 
-| Setup | Runs with the warning |
-| --- | --- |
-| Grid search and forest both parallel | 21 of 30 |
-| Option 1: forest single-threaded | 0 of 30 |
-| Option 2: context-aware warnings | 0 of 30 |
-| Both parallel, with the warning filter above | 12 of 15 |
+| Setup | Runs with the warning, machine A | Machine B |
+| --- | --- | --- |
+| Grid search and forest both parallel | 13 of 15 | 21 of 30 |
+| Option 1: forest single-threaded | 0 of 15 | 0 of 30 |
+| Option 2: context-aware warnings | 0 of 15 | 0 of 30 |
+| Both parallel, with the warning filter above | not run | 12 of 15 |
 
-Every one of the 9,190 warnings in the first row was traced to a recorded event in which a thread emptied a filter list that other tasks were using. A [one-second reproducer](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/root_cause/deterministic_reproducer.py) triggers the same event on every run using only scikit-learn's own `Parallel` and `delayed`, with no dataset. The method, data and limits are in the [root-cause report](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/ROOT_CAUSE.md).
+Every one of the 12,690 warnings in the first row was traced to a recorded event in which a thread emptied a filter list that other tasks were using. A [one-second reproducer](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/root_cause/deterministic_reproducer.py) triggers the same event on every run using only scikit-learn's own `Parallel` and `delayed`, with no dataset. The method, data and limits are in the [root-cause report](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/ROOT_CAUSE.md).
 
 **Environment and limits**
 
-- Python 3.14.6 (standard GIL-enabled build), scikit-learn 1.9.1 (the latest release when tested), joblib 1.6.0, NumPy 2.5.4, SciPy 1.17.1.
-- The table comes from one 4-core machine, one dataset and one parameter grid. An earlier comparison on a second machine (Python 3.14.5, where `n_jobs=-1` gave 16 worker processes) agrees for Option 2: 8 of 15 runs warned without it and 0 of 15 with it.
+- Python 3.14.5 (machine A) and 3.14.6 (machine B), standard GIL-enabled builds; scikit-learn 1.9.1 (the latest release when tested), joblib 1.6.0, NumPy 2.5.4, SciPy 1.17.1.
+- Two machines, one dataset and one parameter grid.
 - How often the warning appears depends on the number of processes and threads. With 4 processes of 4 threads each it did not appear in 10 runs.
 - Options 1 and 2 avoid the conditions the bug needs. They do not change scikit-learn, and a later scikit-learn release may make them unnecessary.
 

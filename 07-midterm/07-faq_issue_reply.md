@@ -26,16 +26,16 @@ With `PYTHON_CONTEXT_AWARE_WARNINGS=1` the same script emits no warning and the 
 
 **Real workload**
 
-Every catch_warnings entry, exit and resetwarnings() call was traced to the list object it acted on, across the main process and all joblib workers, during the same GridSearchCV over RandomForestClassifier as before. All 9,190 warnings in the baseline runs were accounted for by recorded events in which a worker thread emptied a filter list shared with other tasks. None remained unexplained.
+Every catch_warnings entry, exit and resetwarnings() call was traced to the list object it acted on, across the main process and all joblib workers, during the same GridSearchCV over RandomForestClassifier as before. All 12,690 warnings in the baseline runs on both machines were accounted for by recorded events in which a worker thread emptied a filter list shared with other tasks. None remained unexplained.
 
-| Setup (fresh process per run) | Runs with the warning |
-| --- | --- |
-| Grid search and forest both parallel | 21 of 30 |
-| Forest single-threaded, grid search still parallel | 0 of 30 |
-| `PYTHON_CONTEXT_AWARE_WARNINGS=1` | 0 of 30 |
-| Both parallel, with `warnings.filterwarnings("ignore", ...)` | 12 of 15 |
+| Setup (fresh process per run) | My 16-core machine, `n_jobs=-1` | 4-core machine, 16 x 16 layout |
+| --- | --- | --- |
+| Grid search and forest both parallel | 13 of 15 | 21 of 30 |
+| Forest single-threaded, grid search still parallel | 0 of 15 | 0 of 30 |
+| `PYTHON_CONTEXT_AWARE_WARNINGS=1` | 0 of 15 | 0 of 30 |
+| Both parallel, with `warnings.filterwarnings("ignore", ...)` | not run | 12 of 15 |
 
-Fisher exact test for each of the two fixes against the first row: p = 3.6e-9. Without the tracer the first three rows were 5 of 10, 0 of 10 and 0 of 10.
+Fisher exact test for each of the two fixes against the first row: p = 1.8e-6 on my machine and p = 3.6e-9 on the second. Without the tracer the first three rows on the second machine were 5 of 10, 0 of 10 and 0 of 10.
 
 **What changed in the entry**
 
@@ -46,7 +46,8 @@ Fisher exact test for each of the two fixes against the first row: p = 3.6e-9. W
 
 **Limits**
 
-- The new runs are from one 4-core machine (Python 3.14.6, scikit-learn 1.9.1, joblib 1.6.0), set to 16 worker processes and 16 forest threads to match the layout of my original runs. With that machine's own `n_jobs=-1` (4 processes, 4 threads each) the warning did not appear in 10 runs, so the rate depends on the layout.
+- Two machines: my 16-core machine (Python 3.14.5) with plain `n_jobs=-1`, and a 4-core machine (Python 3.14.6) set to 16 worker processes and 16 forest threads. Both use scikit-learn 1.9.1 and joblib 1.6.0. With the 4-core machine's own `n_jobs=-1` (4 processes, 4 threads each) the warning did not appear in 10 runs, so the rate depends on the layout.
+- The filter test and the runs without the tracer were done on the 4-core machine only.
 - One dataset and one parameter grid.
 - The two options avoid the conditions the bug needs. The bug itself is in scikit-learn and is open as scikit-learn/scikit-learn#35089; the code on its `main` branch was the same as 1.9.1 when I checked on 11 November.
 

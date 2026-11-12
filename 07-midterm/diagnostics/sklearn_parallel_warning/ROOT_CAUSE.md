@@ -5,7 +5,7 @@
 | Date | 2026-11-11 |
 | Follows | [`FINDINGS.md`](FINDINGS.md) (2026-11-07), which identified a probable cause but had not observed it |
 | Status | Cause observed directly and reproduced deterministically. Two changes that remove it are confirmed on the real workload. The defect is in scikit-learn and is not fixed upstream |
-| Scope of evidence | One machine (4 cores), Python 3.14.6 (GIL build), scikit-learn 1.9.1, joblib 1.6.0, one dataset and grid. Limits are in section 8 |
+| Scope of evidence | Two machines: a 4-core machine with Python 3.14.6 (sections 4 to 6) and the original 16-core machine with Python 3.14.5 (section 5.1). GIL builds, scikit-learn 1.9.1, joblib 1.6.0, one dataset and grid. Limits are in section 8 |
 
 ## 1. Conclusion
 
@@ -37,6 +37,9 @@ without `Parallel`" and warns.
 | --- | --- |
 | The user's own `warnings.filterwarnings("ignore", ...)` | 12 of 15 attempts still showed the warning; 4,759 of 5,451 raised warnings were shown |
 | Handing tasks a copy of the filter list (a one-line change to scikit-learn, tested as a patch) | 12 of 30 attempts still warned |
+
+The same comparison on the original 16-core machine, with plain `n_jobs=-1`,
+gave 13 of 15, 0 of 15 and 0 of 15 (section 5.1).
 
 The first two rows of the first table do not fix scikit-learn. They avoid the
 condition the defect needs (threads sharing one filter list). The defect
@@ -298,6 +301,37 @@ Notes on each arm:
   force at the moment of the warning had two or fewer entries for 8,361 of
   9,190 warnings (91%).
 
+### 5.1 Replication on the original machine
+
+`root_cause/runs/20261112T032306Z`: the machine of the original reports
+(16 logical CPUs, Python 3.14.5), plain `n_jobs=-1` for both levels with no
+explicit layout, 15 attempts per arm, tracer on, 19 processes per attempt.
+
+| Arm | Warned | Damaged | Thread tasks traced |
+| --- | --- | --- | --- |
+| Baseline | 13 of 15 | 15 of 15 | 183,000 |
+| `PYTHON_CONTEXT_AWARE_WARNINGS=1` | 0 of 15 | 0 of 15 | 183,000 |
+| Forest `n_jobs=1` | 0 of 15 | 0 of 15 | 0 |
+| Snapshot test patch | 10 of 15 | 15 of 15 | 183,000 |
+
+Fisher exact test against baseline: warned p = 1.8e-6 for each fix, damaged
+p = 1.3e-8 for each fix.
+
+Baseline detail: 3,500 warnings, all with configuration present and an empty
+handed list, and 3,500 of 3,500 traced to a recorded cause (500 by cause 1 in
+15 calls, 3,000 by cause 2 in 15 calls). All 15 decisive resets have the
+order of events in section 2, and all 43 captures of an empty or shortened
+list were lists left global by a worker thread's exit. 6,703 tasks ran with a
+shortened list and no warning. Warnings per process: 1, 13, 19, 23, 33, 80,
+101, 141, 200 (12 processes), 289, 400. The best score and best parameters
+were identical in all 60 attempts.
+
+Median wall time with the tracer on: baseline 11.1 s, context-aware 10.8 s,
+single-threaded forest 10.5 s.
+
+Over both machines the baseline warned in 34 of 45 attempts and each fix in
+0 of 45.
+
 ## 6. Controls
 
 All under `root_cause/controls/`.
@@ -356,13 +390,12 @@ threads than cores.
 
 ## 8. Limits and open points
 
-- One machine, one Python and scikit-learn version, one dataset and grid. The
-  rates (21 of 30 and so on) describe this setup only.
-- The 16 x 16 layout was imposed on a 4-core machine to match the process and
-  thread counts of the original reports. The original machine was not
-  available, so the trace was not taken there. Its earlier records
-  (`FINDINGS.md`) match in every field they share with the new ones.
-- Python 3.14.6 here; 3.14.5 in the original reports.
+- Two machines, one scikit-learn version, one dataset and grid. The rates
+  describe these setups only.
+- On the 4-core machine the 16 x 16 layout was imposed to match the process
+  and thread counts of the original reports. On the original 16-core machine
+  the same result came from plain `n_jobs=-1` (section 5.1). The controls in
+  section 6 and the untraced runs were done on the 4-core machine only.
 - Why the resetting thread is paused between entering `catch_warnings` and
   calling `resetwarnings()` was not established. The pauses (1.6 to 420 ms)
   and the dependence on layout suggest the operating system suspending
@@ -377,7 +410,7 @@ threads than cores.
   examined. Upstream notes a possible cost on free-threaded builds, where each
   task takes the `warnings` lock many times.
 - **Side observation, not explained.** In 7 of 203 attempts the best
-  cross-validated ROC AUC was 0.9960724230 and not 0.9960725525, a difference
+  cross-validated ROC AUC on the 4-core machine was 0.9960724230 and not 0.9960725525, a difference
   in the seventh decimal place. All 7 used a threaded forest in the 16 x 16
   layout (7 of 148 attempts with a threaded forest, 0 of 55 with a
   single-threaded one). Two of the 7 had no warning, and one of those was a
@@ -421,6 +454,7 @@ Paths are relative to `07-midterm/diagnostics/sklearn_parallel_warning/`.
 | Comparison runner, aggregator | `root_cause/compare_fixes.py`, `root_cause/summarize_run.py` |
 | Comparison run 1 (4 arms) | `root_cause/runs/20261111T213534Z/` |
 | Comparison run 2 (5 arms, tracer records all modes) | `root_cause/runs/20261111T215036Z/` |
+| Replication on the original 16-core machine | `root_cause/runs/20261112T032306Z/` |
 | Controls | `root_cause/controls/` |
 | Worked example trace | `root_cause/example-trace/` |
 | Tool descriptions and commands | `root_cause/README.md` |
