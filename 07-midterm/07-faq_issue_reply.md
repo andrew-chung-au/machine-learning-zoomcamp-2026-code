@@ -47,7 +47,6 @@ Fisher exact test for each of the two fixes against the first row: p = 1.8e-6 on
 **Limits**
 
 - Two machines: my 16-core machine (Python 3.14.5) with plain `n_jobs=-1`, and a 4-core machine (Python 3.14.6) set to 16 worker processes and 16 forest threads. Both use scikit-learn 1.9.1 and joblib 1.6.0. With the 4-core machine's own `n_jobs=-1` (4 processes, 4 threads each) the warning did not appear in 10 runs, so the rate depends on the layout.
-- The filter test and the runs without the tracer were done on the 4-core machine only.
 - One dataset and one parameter grid.
 - The two options avoid the conditions the bug needs. The bug itself is in scikit-learn and is open as scikit-learn/scikit-learn#35089; the code on its `main` branch was the same as 1.9.1 when I checked on 11 November.
 
