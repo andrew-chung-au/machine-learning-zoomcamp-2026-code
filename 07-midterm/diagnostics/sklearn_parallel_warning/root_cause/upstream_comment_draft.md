@@ -25,4 +25,4 @@ A third outcome gives no warning. The leftover list is shortened but not empty, 
 
 **Limits.** Two machines, one scikit-learn version, one dataset and grid. The rates describe these setups only. The tracer adds work to each task and may change how often the race happens (21 of 30 traced against 5 of 10 untraced on the 4-core machine; the difference is not significant, Fisher p = 0.28). I did not examine whether `PYTHON_CONTEXT_AWARE_WARNINGS=1` has other effects, such as the cost on free-threaded builds mentioned earlier in this thread.
 
-Report, tracer, analyzer and raw traces of the affected processes: [ROOT_CAUSE.md](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/RO
+Report, tracer, analyzer and raw traces of the affected processes: [ROOT_CAUSE.md](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/ROOT_CAUSE.md).
