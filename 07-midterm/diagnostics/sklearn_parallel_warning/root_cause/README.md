@@ -18,10 +18,12 @@ root.
 | `deterministic_reproducer.py` | Smallest reproducer: scikit-learn's own `Parallel` and `delayed`, two threads, four tasks, fixed thread order. No dataset, no estimator, no randomness | about 1 second |
 | `trace/filter_identity_trace.py`, `trace/sitecustomize.py` | Tracer for the real workload. Records which list object every `catch_warnings` entry, `catch_warnings` exit and `resetwarnings()` acts on, in the main process and in joblib workers | adds a little work per task |
 | `analyze_trace.py` | Finds the event that empties the filter list in a set of traces, checks it against the expected order of events, and accounts for every warning | seconds |
-| `compare_fixes.py` | Runs the real grid search under four settings (baseline, context-aware warnings, single-threaded forest, snapshot test patch), traced and analysed, and compares them | about 13 seconds per attempt here |
+| `compare_fixes.py` | Runs the real grid search under several settings (baseline, context-aware warnings, single-threaded forest, snapshot test patch, and optionally the user's own `ignore` filter), traced and analysed, and compares them. `--no-trace` runs it without the tracer | about 13 seconds per attempt here |
+| `summarize_run.py` | Adds up the per-attempt analyses of one comparison run, per arm, and writes `aggregate.json` | seconds |
 | `example-trace/` | Raw trace of one affected worker process from the comparison run, kept as a worked example | |
 | `runs/` | Evidence from `compare_fixes.py` (one folder per run, never overwritten) | |
-| `controls/` | Evidence from the control runs described in `ROOT_CAUSE.md` | |
+| `controls/` | Evidence from the control runs described in `ROOT_CAUSE.md` section 6 | |
+| `upstream_comment_draft.md` | Draft comment for scikit-learn issue #35089. Not posted | |
 
 ## Commands
 

@@ -1,5 +1,11 @@
 # scikit-learn parallel warning diagnostic suite
 
+> **Where to start:** [`ROOT_CAUSE.md`](ROOT_CAUSE.md) has the confirmed cause,
+> the deterministic reproducer and the comparison of fixes. The tools behind it
+> are in [`root_cause/`](root_cause/README.md). [`FINDINGS.md`](FINDINGS.md) and
+> `INVESTIGATION.md` are the earlier stages. The components described below are
+> the first capture suite.
+
 This suite investigates:
 
 `sklearn.utils.parallel.delayed` should be used with
@@ -71,7 +77,8 @@ uv run python 07-midterm/diagnostics/sklearn_parallel_warning/run_tests.py
 
 These checks use synthetic warnings and do not fit the model. They test
 warning capture in joblib workers, filter-list clearing and replacement
-detection, and Python syntax. Successful test output is kept concise;
+detection, Python syntax, the deterministic reproducer in its three modes,
+and the trace analyzer on the kept example trace. Successful test output is kept concise;
 failure output is shown.
 
 For additional filter diagnostics, set `SKLEARN_WARNING_TRACE_FILTERS=1`

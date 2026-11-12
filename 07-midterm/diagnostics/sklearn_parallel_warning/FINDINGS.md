@@ -1,5 +1,31 @@
 # Investigation report: scikit-learn parallel warning in the midterm FAQ entry
 
+> **Update 2026-11-11: the cause is now confirmed. Read
+> [`ROOT_CAUSE.md`](ROOT_CAUSE.md) first.**
+>
+> This report is kept as written on 2026-11-07, apart from this note and the
+> status column of the action table in section 8. Later work changed the
+> following:
+>
+> 1. **The cause is no longer a hypothesis.** The event that empties the
+>    filter list has been recorded in the real grid search and reproduced
+>    deterministically. All 9,190 warnings in 30 baseline attempts were traced
+>    to it (`ROOT_CAUSE.md`, sections 3 and 4).
+> 2. **There are two paths, and section 4.3 below describes only one.** The
+>    list handed to the tasks is the live `warnings.filters` object, and a
+>    thread can empty it during the call. This path was not known when this
+>    report was written.
+> 3. **Open observations 1 and 2 in section 5 are explained**
+>    (`ROOT_CAUSE.md`, section 7).
+> 4. **The single-threaded forest is now tested, not only observed**: 0 of 30
+>    attempts warned, against 21 of 30 with both levels parallel. It is the
+>    recommended fix in the FAQ entry. Context-aware warnings also gave 0 of
+>    30 (`ROOT_CAUSE.md`, section 5).
+> 5. **The `filterwarnings` step is now tested and does not work**: 12 of 15
+>    attempts still showed the warning.
+> 6. **The probe in section 4.4 copies the captured list**, so it models the
+>    path in section 4.3 but cannot show the other one.
+
 | | |
 | --- | --- |
 | Date | 2026-11-07 |
@@ -277,9 +303,9 @@ Supporting runs:
 | 1 | Publish a runnable reproducer with the estimator, grid, command and traceback requested by the maintainer (section 3) | Author | Done in this report |
 | 2 | Run a controlled comparison rather than rely on a single observation | Author | Done (section 4.5) |
 | 3 | Revise the FAQ entry (below) | Author | Done (`07-midterm/07-faq_pr.md`) |
-| 4 | Record the transition from 5 filters to an empty list directly: log `len(warnings._get_filters())` with timestamp, process ID and thread ID at each inner `Parallel` start and in the warning hook. Do not rely on a list subclass | Author | **Pending** |
-| 5 | Investigate open observations 1 and 2 using those records | Author | **Pending** |
-| 6 | Add the real-workload evidence to scikit-learn #35089 | Author | **Pending** |
+| 4 | Record the transition from 5 filters to an empty list directly: log `len(warnings._get_filters())` with timestamp, process ID and thread ID at each inner `Parallel` start and in the warning hook. Do not rely on a list subclass | Author | Done 2026-11-11 (`ROOT_CAUSE.md` section 4; the tracer records list identities at every `catch_warnings` entry, exit and `resetwarnings()`) |
+| 5 | Investigate open observations 1 and 2 using those records | Author | Done 2026-11-11 (`ROOT_CAUSE.md` section 7) |
+| 6 | Add the real-workload evidence to scikit-learn #35089 | Author | **Pending**: draft in `root_cause/upstream_comment_draft.md`, not posted |
 | 7 | Annotate `INVESTIGATION.md` with the correction in section 6 | Author | Done |
 
 **Proposed FAQ revision**

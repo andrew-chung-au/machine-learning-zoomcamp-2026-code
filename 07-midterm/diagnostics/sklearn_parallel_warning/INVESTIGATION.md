@@ -1,5 +1,9 @@
 # Investigation: scikit-learn parallel warning
 
+> **Update 2026-11-11: the cause has since been observed directly and
+> reproduced deterministically. Read `ROOT_CAUSE.md` first.** The note of
+> 2026-11-07 below predates that.
+>
 > **Update 2026-11-07: superseded in part. Read `FINDINGS.md` first.**
 >
 > This file records the first stage of the investigation and is kept
