@@ -4,14 +4,14 @@
 | --- | --- |
 | Date | 2026-11-11 |
 | Follows | [`FINDINGS.md`](FINDINGS.md) (2026-11-07), which identified a probable cause but had not observed it |
-| Status | Cause observed directly and reproduced deterministically. Two changes that remove it are confirmed on the real workload. The defect is in scikit-learn and is not fixed upstream |
-| Scope of evidence | Two machines: a 4-core machine with Python 3.14.6 (sections 4 to 6) and the original 16-core machine with Python 3.14.5 (section 5.1). GIL builds, scikit-learn 1.9.1, joblib 1.6.0, one dataset and grid. Limits are in section 8 |
+| Status | Cause observed directly and reproduced deterministically. Two changes that remove it are supported by direct observation on two machines. The defect is in scikit-learn and is not fixed upstream |
+| Scope of evidence | Two machines: a 4-core machine with Python 3.14.6 (sections 4 to 6) and the original 16-core machine with Python 3.14.5 (sections 5.1 and 6). GIL builds, scikit-learn 1.9.1, joblib 1.6.0, one dataset and grid. Limits are in section 8 |
 
 ## 1. Conclusion
 
 The warning is a false alarm raised by scikit-learn. The code that triggers
 it pairs `delayed` and `Parallel` correctly, and scikit-learn's configuration
-reaches the workers every time.
+reaches the workers in every recorded warning.
 
 **Cause.** In every parallel task scikit-learn 1.9.1 swaps Python's
 warning-filter list (`warnings.catch_warnings()`), empties it
@@ -330,7 +330,34 @@ Median wall time with the tracer on: baseline 11.1 s, context-aware 10.8 s,
 single-threaded forest 10.5 s.
 
 Over both machines the baseline warned in 34 of 45 attempts and each fix in
-0 of 45.
+0 of 45 (first 16-core run only).
+
+#### User filter on the 16-core machine
+
+`root_cause/runs/20261112T035229Z`: 15 attempts per arm, tracer on, plain
+`n_jobs=-1`. This run repeated the baseline alongside the user-filter arm.
+
+| Arm | Warned | Damaged |
+| --- | --- | --- |
+| Baseline | 13 of 15 | 15 of 15 |
+| User's `filterwarnings("ignore", ...)` | 11 of 15 | 14 of 15 |
+
+Fisher exact test against baseline: warned p = 0.65, damaged p = 1.0. As on the
+4-core machine, the user's filter did not stop the warning.
+
+#### Untraced runs on the 16-core machine
+
+`root_cause/runs/20261112T040023Z`: 10 attempts per arm, tracer off, plain
+`n_jobs=-1`.
+
+| Arm | Warned | Median wall time |
+| --- | --- | --- |
+| Baseline | 3 of 10 | 10.6 s |
+| `PYTHON_CONTEXT_AWARE_WARNINGS=1` | 0 of 10 | 11.0 s |
+| Forest `n_jobs=1` | 0 of 10 | 9.9 s |
+
+Fisher exact test against baseline: warned p = 0.21 for each fix. With 10
+attempts per arm this run is too small to be significant on its own.
 
 ## 6. Controls
 
@@ -341,7 +368,7 @@ All under `root_cause/controls/`.
 | `20261111T220745Z` | 16 x 16 | **off** | Baseline warned in 5 of 10; context-aware 0 of 10; single-threaded forest 0 of 10. The warning does not depend on the tracer |
 | `20261111T221422Z` | grid search sequential, forest 16 threads | on | 0 of 8 warned, 0 of 8 damaged (97,600 thread tasks) |
 | `20261111T221702Z` | this machine's `n_jobs=-1` (4 x 4) | on | Baseline 0 of 10 warned, 0 of 10 damaged; single-threaded forest 0 of 10 |
-| `20261111T222016Z` | this machine's `n_jobs=-1` (4 x 4) | off | Timing only (below); no warning in 10 attempts |
+| `20261111T222016Z` | this machine's `n_jobs=-1` (4 x 4) | off | Timing only (below); no warning in 5 baseline attempts (5 single-threaded-forest attempts also clean) |
 
 How often the race happens depends strongly on the layout. With 16 processes
 each running 16 threads it damaged a filter list in 26 of 30 attempts. With
@@ -395,7 +422,9 @@ threads than cores.
 - On the 4-core machine the 16 x 16 layout was imposed to match the process
   and thread counts of the original reports. On the original 16-core machine
   the same result came from plain `n_jobs=-1` (section 5.1). The controls in
-  section 6 and the untraced runs were done on the 4-core machine only.
+  section 6 were done on the 4-core machine only. Untraced runs were done on
+  both machines (section 6 for the 4-core machine, section 5.1 for the 16-core
+  machine).
 - Why the resetting thread is paused between entering `catch_warnings` and
   calling `resetwarnings()` was not established. The pauses (1.6 to 420 ms)
   and the dependence on layout suggest the operating system suspending
@@ -455,6 +484,8 @@ Paths are relative to `07-midterm/diagnostics/sklearn_parallel_warning/`.
 | Comparison run 1 (4 arms) | `root_cause/runs/20261111T213534Z/` |
 | Comparison run 2 (5 arms, tracer records all modes) | `root_cause/runs/20261111T215036Z/` |
 | Replication on the original 16-core machine | `root_cause/runs/20261112T032306Z/` |
+| 16-core user filter (baseline repeated, tracer on) | `root_cause/runs/20261112T035229Z/` |
+| 16-core untraced (baseline, context-aware, single-threaded forest) | `root_cause/runs/20261112T040023Z/` |
 | Controls | `root_cause/controls/` |
 | Worked example trace | `root_cause/example-trace/` |
 | Tool descriptions and commands | `root_cause/README.md` |

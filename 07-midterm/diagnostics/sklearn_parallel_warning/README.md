@@ -1,10 +1,10 @@
 # scikit-learn parallel warning diagnostic suite
 
-> **Where to start:** [`ROOT_CAUSE.md`](ROOT_CAUSE.md) has the confirmed cause,
-> the deterministic reproducer and the comparison of fixes. The tools behind it
-> are in [`root_cause/`](root_cause/README.md). [`FINDINGS.md`](FINDINGS.md) and
-> `INVESTIGATION.md` are the earlier stages. The components described below are
-> the first capture suite.
+> **Where to start:** [`ROOT_CAUSE.md`](ROOT_CAUSE.md) reports the cause as
+> observed directly on two machines. It also covers the deterministic reproducer
+> and the comparison of fixes. The tools behind it are in [`root_cause/`](root_cause/README.md).
+> [`FINDINGS.md`](FINDINGS.md) and `INVESTIGATION.md` are the earlier stages.
+> The components described below are the first capture suite.
 
 This suite investigates:
 

@@ -1,6 +1,6 @@
 # Investigation report: scikit-learn parallel warning in the midterm FAQ entry
 
-> **Update 2026-11-11: the cause is now confirmed. Read
+> **Update 2026-11-11: the cause is now supported by direct observation on two machines. Read
 > [`ROOT_CAUSE.md`](ROOT_CAUSE.md) first.**
 >
 > This report is kept as written on 2026-11-07, apart from this note and the

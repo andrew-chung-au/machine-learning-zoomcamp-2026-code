@@ -38,10 +38,10 @@ Every `catch_warnings` entry, exit, and `resetwarnings()` call was traced to the
 
 | Setup (fresh process per run) | 16-core machine, `n_jobs=-1` | 4-core machine, 16 × 16 layout |
 |:---|---:|---:|
-| Grid search and forest both parallel | 13 of 15 warned; 15 of 15 corrupted | 21 of 30 warned; 30 of 30 corrupted |
+| Grid search and forest both parallel | 13 of 15 warned; 15 of 15 corrupted | 21 of 30 warned; 26 of 30 corrupted |
 | Forest single-threaded, grid search still parallel | 0 of 15 warned; 0 of 15 corrupted | 0 of 30 warned; 0 of 30 corrupted |
-| `PYTHON_CONTEXT_AWARE_WARNINGS=1` | 0 of 15 warned; 0 of 15 corrupted | 0 of 30 warned; 0 of 30 corrupted |
-| Both parallel, with `warnings.filterwarnings("ignore", ...)` | 11 of 15 warned; 14 of 15 corrupted | 12 of 15 warned |
+| `PYTHON_CONTEXT_AWARE_WARNINGS=1` | 0 of 15 warned; 0 of 15 corrupted | 0 of 30 warned; 0 of 15 corrupted (measured in the second run only) |
+| Both parallel, with `warnings.filterwarnings("ignore", ...)` | 11 of 15 warned; 14 of 15 corrupted | 12 of 15 warned; 14 of 15 corrupted |
 
 In the traced baseline runs on both machines, all 12,690 observed warnings were accounted for by recorded events in which a worker thread emptied a warning-filter list shared with other tasks. This supports the race condition demonstrated by the deterministic reproducer as the cause of the warnings in these tests.
 
