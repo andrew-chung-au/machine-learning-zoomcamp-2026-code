@@ -5,7 +5,7 @@
 | Date | 2026-11-11 |
 | Follows | [`FINDINGS.md`](FINDINGS.md) (2026-11-07), which identified a probable cause but had not observed it |
 | Status | Cause observed directly and reproduced deterministically. Two changes that remove it are supported by direct observation on two machines. The defect is in scikit-learn and is not fixed upstream |
-| Scope of evidence | Two machines: a 4-core machine with Python 3.14.6 (sections 4 to 6) and the original 16-core machine with Python 3.14.5 (sections 5.1 and 6). GIL builds, scikit-learn 1.9.1, joblib 1.6.0, one dataset and grid. Limits are in section 8 |
+| Scope of evidence | Two machines: a 4-core machine with Python 3.14.6 (sections 4 to 6) and the original 16-core machine with Python 3.14.5 (section 5.1). GIL builds, scikit-learn 1.9.1, joblib 1.6.0, one dataset and grid. Limits are in section 8 |
 
 ## 1. Conclusion
 

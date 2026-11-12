@@ -108,7 +108,7 @@ This is the usual first attempt, and it fails here for the same reason the warni
 | Grid search and forest both parallel | 13 of 15 | 21 of 30 |
 | Option 1: forest single-threaded | 0 of 15 | 0 of 30 |
 | Option 2: context-aware warnings | 0 of 15 | 0 of 30 |
-| Both parallel, with the warning filter above | not run | 12 of 15 |
+| Both parallel, with the warning filter above | 11 of 15 | 12 of 15 |
 
 Every one of the 12,690 warnings in the first row was traced to a recorded event in which a thread emptied a filter list that other tasks were using. A [one-second reproducer](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/root_cause/deterministic_reproducer.py) triggers the same event on every run using only scikit-learn's own `Parallel` and `delayed`, with no dataset. The method, data and limits are in the [root-cause report](https://github.com/andrew-chung-au/machine-learning-zoomcamp-2026-code/blob/main/07-midterm/diagnostics/sklearn_parallel_warning/ROOT_CAUSE.md).
 
